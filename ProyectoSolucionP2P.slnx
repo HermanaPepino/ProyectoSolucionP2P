@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ProyectoSolcuionP2P.CORE/ProyectoSolucionP2P.CORE.csproj" />
+  <Project Path="ProyectoSolucionP2P.API/ProyectoSolucionP2P.API.csproj" />
+</Solution>
