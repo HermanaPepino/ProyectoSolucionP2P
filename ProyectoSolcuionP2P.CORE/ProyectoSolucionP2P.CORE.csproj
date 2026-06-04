@@ -23,7 +23,6 @@
     <Folder Include="Core\DTOs\" />
     <Folder Include="Core\Entities\" />
     <Folder Include="Core\Settings\" />
-    <Folder Include="Infraestructure\Data\" />
     <Folder Include="Infraestructure\Shared\" />
   </ItemGroup>
 
