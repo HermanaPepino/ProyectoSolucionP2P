@@ -37,7 +37,9 @@ namespace ProyectoSolucionP2P.CORE.Infraestructure.Repositories
 
         public async Task<Usuario?> GetByIdAsync(int id)
         {
-            return await _db.Usuario.FindAsync(id);
+            return await _db.Usuario
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task UpdateAsync(Usuario entity)
