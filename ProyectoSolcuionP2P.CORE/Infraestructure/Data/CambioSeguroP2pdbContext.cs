@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using ProyectoSolucionP2P.CORE.Core.Entities;
 
-namespace ProyectoSolucionP2P.CORE.Core.Entities;
+namespace ProyectoSolucionP2P.CORE.Infraestructure.Data;
 
 public partial class CambioSeguroP2pdbContext : DbContext
 {
