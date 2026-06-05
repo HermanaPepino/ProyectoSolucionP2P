@@ -3,6 +3,7 @@ using ProyectoSolucionP2P.CORE.Core.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ProyectoSolucionP2P.CORE.Infraestructure.Data;
 
 namespace ProyectoSolucionP2P.CORE.Infraestructure.Repositories
 {

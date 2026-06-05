@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using ProyectoSolucionP2P.CORE.Core.Entities;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
 using ProyectoSolucionP2P.CORE.Infraestructure.Repositories;
 using ProyectoSolucionP2P.CORE.Core.Services;
+using ProyectoSolucionP2P.CORE.Infraestructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
