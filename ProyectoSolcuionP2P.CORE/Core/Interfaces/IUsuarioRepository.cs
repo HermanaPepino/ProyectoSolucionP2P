@@ -1,6 +1,4 @@
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using ProyectoSolucionP2P.CORE.Core.Entities;
 
 namespace ProyectoSolucionP2P.CORE.Core.Interfaces
 {
@@ -8,6 +6,7 @@ namespace ProyectoSolucionP2P.CORE.Core.Interfaces
     {
         Task<IEnumerable<Usuario>> GetAllAsync();
         Task<Usuario?> GetByIdAsync(int id);
+        Task<Usuario?> GetByCorreoAsync(string correo);   // para login y validar correo único
         Task<Usuario> CreateAsync(Usuario entity);
         Task UpdateAsync(Usuario entity);
         Task DeleteAsync(int id);

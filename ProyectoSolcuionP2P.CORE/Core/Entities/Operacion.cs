@@ -25,19 +25,21 @@ public partial class Operacion
 
     public DateTime? FechaLiberacion { get; set; }
 
-    public virtual ICollection<Calificacion> Calificacion { get; set; } = new List<Calificacion>();
+    public virtual ICollection<Calificacion> Calificacions { get; set; } = new List<Calificacion>();
 
     public virtual Usuario Comprador { get; set; } = null!;
 
-    public virtual ICollection<ComprobantePago> ComprobantePago { get; set; } = new List<ComprobantePago>();
+    public virtual ICollection<ComprobantePago> ComprobantePagos { get; set; } = new List<ComprobantePago>();
 
     public virtual ICollection<Disputa> Disputa { get; set; } = new List<Disputa>();
 
-    public virtual ICollection<Mensaje> Mensaje { get; set; } = new List<Mensaje>();
+    public virtual ICollection<Mensaje> Mensajes { get; set; } = new List<Mensaje>();
+
+    public virtual ICollection<Notificacion> Notificacions { get; set; } = new List<Notificacion>();
 
     public virtual Oferta Oferta { get; set; } = null!;
 
-    public virtual ICollection<TemporizadorOperacion> TemporizadorOperacion { get; set; } = new List<TemporizadorOperacion>();
+    public virtual ICollection<TemporizadorOperacion> TemporizadorOperacions { get; set; } = new List<TemporizadorOperacion>();
 
     public virtual Usuario Vendedor { get; set; } = null!;
 }

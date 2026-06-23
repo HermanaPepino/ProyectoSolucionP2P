@@ -23,17 +23,21 @@ public partial class Usuario
 
     public DateTime? FechaRegistro { get; set; }
 
-    public virtual ICollection<Calificacion> Calificacion { get; set; } = new List<Calificacion>();
+    public virtual ICollection<Calificacion> Calificacions { get; set; } = new List<Calificacion>();
 
-    public virtual ICollection<Mensaje> MensajeDestinatario { get; set; } = new List<Mensaje>();
+    public virtual ICollection<Mensaje> MensajeDestinatarios { get; set; } = new List<Mensaje>();
 
-    public virtual ICollection<Mensaje> MensajeRemitente { get; set; } = new List<Mensaje>();
+    public virtual ICollection<Mensaje> MensajeRemitentes { get; set; } = new List<Mensaje>();
+
+    public virtual ICollection<Notificacion> Notificacions { get; set; } = new List<Notificacion>();
 
     public virtual ICollection<Oferta> Oferta { get; set; } = new List<Oferta>();
 
-    public virtual ICollection<Operacion> OperacionComprador { get; set; } = new List<Operacion>();
+    public virtual ICollection<Operacion> OperacionCompradors { get; set; } = new List<Operacion>();
 
-    public virtual ICollection<Operacion> OperacionVendedor { get; set; } = new List<Operacion>();
+    public virtual ICollection<Operacion> OperacionVendedors { get; set; } = new List<Operacion>();
 
-    public virtual ICollection<VerificacionIdentidad> VerificacionIdentidad { get; set; } = new List<VerificacionIdentidad>();
+    public virtual ICollection<ReporteAdministrativo> ReporteAdministrativos { get; set; } = new List<ReporteAdministrativo>();
+
+    public virtual ICollection<VerificacionIdentidad> VerificacionIdentidads { get; set; } = new List<VerificacionIdentidad>();
 }

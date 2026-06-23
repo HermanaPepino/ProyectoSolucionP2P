@@ -1,6 +1,4 @@
 using ProyectoSolucionP2P.CORE.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ProyectoSolucionP2P.CORE.Core.Interfaces
 {

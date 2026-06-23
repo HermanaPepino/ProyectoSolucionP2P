@@ -1,15 +1,13 @@
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 
 namespace ProyectoSolucionP2P.CORE.Core.Interfaces
 {
     public interface ICalificacionService
     {
-        Task<IEnumerable<Calificacion>> GetAllAsync();
-        Task<Calificacion?> GetByIdAsync(int id);
-        Task<Calificacion> CreateAsync(Calificacion entity);
-        Task UpdateAsync(Calificacion entity);
-        Task DeleteAsync(int id);
+        Task<IEnumerable<CalificacionDto>> GetAllAsync();
+        Task<CalificacionDto?> GetByIdAsync(int id);
+        Task<CalificacionDto> CreateAsync(CalificacionDto dto);
+        Task<bool> UpdateAsync(int id, CalificacionDto dto);
+        Task<bool> DeleteAsync(int id);
     }
 }

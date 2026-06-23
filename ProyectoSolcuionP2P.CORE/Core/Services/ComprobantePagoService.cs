@@ -1,27 +1,61 @@
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Entities;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ProyectoSolucionP2P.CORE.Core.Services
 {
     public class ComprobantePagoService : IComprobantePagoService
     {
         private readonly IComprobantePagoRepository _repo;
+        public ComprobantePagoService(IComprobantePagoRepository repo) { _repo = repo; }
 
-        public ComprobantePagoService(IComprobantePagoRepository repo)
+        public async Task<IEnumerable<ComprobantePagoDto>> GetAllAsync()
+            => (await _repo.GetAllAsync()).Select(MapToDto);
+
+        public async Task<ComprobantePagoDto?> GetByIdAsync(int id)
         {
-            _repo = repo;
+            var e = await _repo.GetByIdAsync(id);
+            return e == null ? null : MapToDto(e);
         }
 
-        public Task<ComprobantePago> CreateAsync(ComprobantePago entity) => _repo.CreateAsync(entity);
+        public async Task<ComprobantePagoDto> CreateAsync(ComprobantePagoDto dto)
+        {
+            var e = new ComprobantePago 
+            { 
+                OperacionId = dto.OperacionId,
+                RutaArchivo = dto.RutaArchivo,
+                FechaSubida = dto.FechaSubida
+            };
+            var creado = await _repo.CreateAsync(e);
+            dto.Id = creado.Id;
+            return MapToDto(creado);
+        }
 
-        public Task DeleteAsync(int id) => _repo.DeleteAsync(id);
+        public async Task<bool> UpdateAsync(int id, ComprobantePagoDto dto)
+        {
+            var e = await _repo.GetByIdAsync(id);
+            if (e == null) return false;
+            e.OperacionId = dto.OperacionId;
+            e.RutaArchivo = dto.RutaArchivo;
+            e.FechaSubida = dto.FechaSubida;
+            await _repo.UpdateAsync(e);
+            return true;
+        }
 
-        public Task<IEnumerable<ComprobantePago>> GetAllAsync() => _repo.GetAllAsync();
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var e = await _repo.GetByIdAsync(id);
+            if (e == null) return false;
+            await _repo.DeleteAsync(id);
+            return true;
+        }
 
-        public Task<ComprobantePago?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
-
-        public Task UpdateAsync(ComprobantePago entity) => _repo.UpdateAsync(entity);
+        private static ComprobantePagoDto MapToDto(ComprobantePago e) => new ComprobantePagoDto
+        {
+            Id = e.Id,
+            OperacionId = e.OperacionId,
+            RutaArchivo = e.RutaArchivo,
+            FechaSubida = e.FechaSubida
+        };
     }
 }

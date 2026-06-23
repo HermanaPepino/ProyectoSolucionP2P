@@ -1,10 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using ProyectoSolucionP2P.CORE.Core.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
+using ProyectoSolucionP2P.CORE.Core.Interfaces;
 
 namespace ProyectoSolucionP2P.API.Controllers
 {
@@ -21,106 +17,38 @@ namespace ProyectoSolucionP2P.API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            var dtos = list.Select(u => new UsuarioDto
-            {
-                Id = u.Id,
-                NombreCompleto = u.NombreCompleto,
-                Correo = u.Correo,
-                Password = u.Password,
-                Telefono = u.Telefono,
-                Rol = u.Rol,
-                EstadoVerificacion = u.EstadoVerificacion,
-                Reputacion = u.Reputacion,
-                FechaRegistro = u.FechaRegistro
-            });
-            return Ok(dtos);
-        }
+            => Ok(await _service.GetAllAsync());
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var ent = await _service.GetByIdAsync(id);
-            if (ent == null) return NotFound();
-            var dto = new UsuarioDto
-            {
-                Id = ent.Id,
-                NombreCompleto = ent.NombreCompleto,
-                Correo = ent.Correo,
-                Password = ent.Password,
-                Telefono = ent.Telefono,
-                Rol = ent.Rol,
-                EstadoVerificacion = ent.EstadoVerificacion,
-                Reputacion = ent.Reputacion,
-                FechaRegistro = ent.FechaRegistro
-            };
-            return Ok(dto);
+            var u = await _service.GetByIdAsync(id);
+            return u == null ? NotFound() : Ok(u);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(UsuarioDto model)
+        // HU-001
+        [HttpPost("registrar")]
+        public async Task<IActionResult> Registrar(UsuarioRegistroDto dto)
         {
-            var entity = new Usuario
-            {
-                NombreCompleto = model.NombreCompleto,
-                Correo = model.Correo,
-                Password = model.Password,
-                Telefono = model.Telefono,
-                Rol = model.Rol,
-                EstadoVerificacion = model.EstadoVerificacion,
-                Reputacion = model.Reputacion,
-                FechaRegistro = model.FechaRegistro
-            };
+            var creado = await _service.RegistrarAsync(dto);
+            if (creado == null) return BadRequest("El correo ya está registrado.");
+            return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
+        }
 
-            var created = await _service.CreateAsync(entity);
-            var createdDto = new UsuarioDto
-            {
-                Id = created.Id,
-                NombreCompleto = created.NombreCompleto,
-                Correo = created.Correo,
-                Password = created.Password,
-                Telefono = created.Telefono,
-                Rol = created.Rol,
-                EstadoVerificacion = created.EstadoVerificacion,
-                Reputacion = created.Reputacion,
-                FechaRegistro = created.FechaRegistro
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, createdDto);
+        // HU-002
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginDto dto)
+        {
+            var u = await _service.LoginAsync(dto);
+            return u == null ? Unauthorized("Correo o contraseña incorrectos.") : Ok(u);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UsuarioDto model)
-        {
-            if (id != model.Id) return BadRequest();
-            var exists = await _service.GetByIdAsync(id);
-            if (exists == null) return NotFound();
-
-            var entity = new Usuario
-            {
-                Id = model.Id,
-                NombreCompleto = model.NombreCompleto,
-                Correo = model.Correo,
-                Password = model.Password,
-                Telefono = model.Telefono,
-                Rol = model.Rol,
-                EstadoVerificacion = model.EstadoVerificacion,
-                Reputacion = model.Reputacion,
-                FechaRegistro = model.FechaRegistro
-            };
-
-            await _service.UpdateAsync(entity);
-            return NoContent();
-        }
+        public async Task<IActionResult> Update(int id, UsuarioRegistroDto dto)
+            => await _service.UpdateAsync(id, dto) ? NoContent() : NotFound();
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
-        {
-            var exists = await _service.GetByIdAsync(id);
-            if (exists == null) return NotFound();
-            await _service.DeleteAsync(id);
-            return NoContent();
-        }
+            => await _service.DeleteAsync(id) ? NoContent() : NotFound();
     }
 }
