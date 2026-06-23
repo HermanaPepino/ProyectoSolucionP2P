@@ -1,15 +1,13 @@
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 
 namespace ProyectoSolucionP2P.CORE.Core.Interfaces
 {
     public interface IVerificacionIdentidadService
     {
-        Task<IEnumerable<VerificacionIdentidad>> GetAllAsync();
-        Task<VerificacionIdentidad?> GetByIdAsync(int id);
-        Task<VerificacionIdentidad> CreateAsync(VerificacionIdentidad entity);
-        Task UpdateAsync(VerificacionIdentidad entity);
-        Task DeleteAsync(int id);
+        Task<IEnumerable<VerificacionIdentidadDto>> GetAllAsync();
+        Task<VerificacionIdentidadDto?> GetByIdAsync(int id);
+        Task<VerificacionIdentidadDto> CreateAsync(VerificacionIdentidadDto dto);
+        Task<bool> UpdateAsync(int id, VerificacionIdentidadDto dto);
+        Task<bool> DeleteAsync(int id);
     }
 }

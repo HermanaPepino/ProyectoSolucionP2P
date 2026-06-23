@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using ProyectoSolucionP2P.CORE.Core.Entities;
 
-namespace ProyectoSolucionP2P.CORE.Infraestructure.Data;
+namespace ProyectoSolucionP2P.CORE.Infrastructure.Data;
 
 public partial class CambioSeguroP2pdbContext : DbContext
 {
@@ -16,37 +16,44 @@ public partial class CambioSeguroP2pdbContext : DbContext
     {
     }
 
-    public virtual DbSet<Calificacion> Calificacion { get; set; }
+    public virtual DbSet<Calificacion> Calificacions { get; set; }
 
-    public virtual DbSet<ComprobantePago> ComprobantePago { get; set; }
+    public virtual DbSet<ComprobantePago> ComprobantePagos { get; set; }
 
     public virtual DbSet<Disputa> Disputa { get; set; }
 
-    public virtual DbSet<Mensaje> Mensaje { get; set; }
+    public virtual DbSet<EvidenciaDisputa> EvidenciaDisputa { get; set; }
+
+    public virtual DbSet<Mensaje> Mensajes { get; set; }
+
+    public virtual DbSet<MetodoPago> MetodoPagos { get; set; }
 
     public virtual DbSet<Moneda> Moneda { get; set; }
 
+    public virtual DbSet<Notificacion> Notificacions { get; set; }
+
+    public virtual DbSet<OfertaMetodoPago> OfertaMetodoPagos { get; set; }
+
     public virtual DbSet<Oferta> Oferta { get; set; }
 
-    public virtual DbSet<Operacion> Operacion { get; set; }
+    public virtual DbSet<Operacion> Operacions { get; set; }
 
-    public virtual DbSet<ReporteAdministrativo> ReporteAdministrativo { get; set; }
+    public virtual DbSet<ReporteAdministrativo> ReporteAdministrativos { get; set; }
 
-    public virtual DbSet<TemporizadorOperacion> TemporizadorOperacion { get; set; }
+    public virtual DbSet<TemporizadorOperacion> TemporizadorOperacions { get; set; }
 
-    public virtual DbSet<Usuario> Usuario { get; set; }
+    public virtual DbSet<Usuario> Usuarios { get; set; }
 
-    public virtual DbSet<VerificacionIdentidad> VerificacionIdentidad { get; set; }
+    public virtual DbSet<VerificacionIdentidad> VerificacionIdentidads { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
     }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Calificacion>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Califica__3214EC0729320536");
+            entity.ToTable("Calificacion");
 
             entity.Property(e => e.Comentario)
                 .HasMaxLength(300)
@@ -55,12 +62,12 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
 
-            entity.HasOne(d => d.Operacion).WithMany(p => p.Calificacion)
+            entity.HasOne(d => d.Operacion).WithMany(p => p.Calificacions)
                 .HasForeignKey(d => d.OperacionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Calificacion_Operacion");
 
-            entity.HasOne(d => d.UsuarioCalificado).WithMany(p => p.Calificacion)
+            entity.HasOne(d => d.UsuarioCalificado).WithMany(p => p.Calificacions)
                 .HasForeignKey(d => d.UsuarioCalificadoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Calificacion_Usuario");
@@ -68,7 +75,7 @@ public partial class CambioSeguroP2pdbContext : DbContext
 
         modelBuilder.Entity<ComprobantePago>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comproba__3214EC07B26502B8");
+            entity.ToTable("ComprobantePago");
 
             entity.Property(e => e.FechaSubida)
                 .HasDefaultValueSql("(getdate())")
@@ -77,7 +84,7 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .HasMaxLength(300)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.Operacion).WithMany(p => p.ComprobantePago)
+            entity.HasOne(d => d.Operacion).WithMany(p => p.ComprobantePagos)
                 .HasForeignKey(d => d.OperacionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ComprobantePago_Operacion");
@@ -85,8 +92,6 @@ public partial class CambioSeguroP2pdbContext : DbContext
 
         modelBuilder.Entity<Disputa>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Disputa__3214EC07D767B6A3");
-
             entity.Property(e => e.Estado)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -106,9 +111,26 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .HasConstraintName("FK_Disputa_Operacion");
         });
 
+        modelBuilder.Entity<EvidenciaDisputa>(entity =>
+        {
+            entity.Property(e => e.FechaSubida)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.RutaArchivo)
+                .HasMaxLength(300)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Disputa).WithMany(p => p.EvidenciaDisputa)
+                .HasForeignKey(d => d.DisputaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EvidenciaDisputa_Disputa");
+        });
+
         modelBuilder.Entity<Mensaje>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Mensaje__3214EC07CC598DD2");
+            entity.ToTable("Mensaje");
+
+            entity.HasIndex(e => e.OperacionId, "IX_Mensaje_Operacion");
 
             entity.Property(e => e.Contenido)
                 .HasMaxLength(500)
@@ -117,24 +139,36 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
 
-            entity.HasOne(d => d.Destinatario).WithMany(p => p.MensajeDestinatario)
+            entity.HasOne(d => d.Destinatario).WithMany(p => p.MensajeDestinatarios)
                 .HasForeignKey(d => d.DestinatarioId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Mensaje_Destinatario");
 
-            entity.HasOne(d => d.Operacion).WithMany(p => p.Mensaje)
+            entity.HasOne(d => d.Operacion).WithMany(p => p.Mensajes)
                 .HasForeignKey(d => d.OperacionId)
                 .HasConstraintName("FK_Mensaje_Operacion");
 
-            entity.HasOne(d => d.Remitente).WithMany(p => p.MensajeRemitente)
+            entity.HasOne(d => d.Remitente).WithMany(p => p.MensajeRemitentes)
                 .HasForeignKey(d => d.RemitenteId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Mensaje_Remitente");
         });
 
+        modelBuilder.Entity<MetodoPago>(entity =>
+        {
+            entity.ToTable("MetodoPago");
+
+            entity.HasIndex(e => e.Nombre, "UQ_MetodoPago_Nombre").IsUnique();
+
+            entity.Property(e => e.Activo).HasDefaultValue(true);
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Moneda>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Moneda__3214EC0789B96330");
+            entity.HasIndex(e => e.Codigo, "UQ_Moneda_Codigo").IsUnique();
 
             entity.Property(e => e.Codigo)
                 .HasMaxLength(10)
@@ -144,9 +178,54 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<Notificacion>(entity =>
+        {
+            entity.ToTable("Notificacion");
+
+            entity.HasIndex(e => new { e.UsuarioId, e.Leida }, "IX_Notificacion_Usuario");
+
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Mensaje)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Titulo)
+                .HasMaxLength(150)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Operacion).WithMany(p => p.Notificacions)
+                .HasForeignKey(d => d.OperacionId)
+                .HasConstraintName("FK_Notificacion_Operacion");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.Notificacions)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Notificacion_Usuario");
+        });
+
+        modelBuilder.Entity<OfertaMetodoPago>(entity =>
+        {
+            entity.ToTable("OfertaMetodoPago");
+
+            entity.HasIndex(e => new { e.OfertaId, e.MetodoPagoId }, "UQ_OfertaMetodoPago").IsUnique();
+
+            entity.HasOne(d => d.MetodoPago).WithMany(p => p.OfertaMetodoPagos)
+                .HasForeignKey(d => d.MetodoPagoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OfertaMetodoPago_MetodoPago");
+
+            entity.HasOne(d => d.Oferta).WithMany(p => p.OfertaMetodoPagos)
+                .HasForeignKey(d => d.OfertaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OfertaMetodoPago_Oferta");
+        });
+
         modelBuilder.Entity<Oferta>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Oferta__3214EC07BB1ED70F");
+            entity.HasIndex(e => e.Estado, "IX_Oferta_Estado");
+
+            entity.HasIndex(e => new { e.MonedaOrigenId, e.MonedaDestinoId }, "IX_Oferta_Monedas");
 
             entity.Property(e => e.Estado)
                 .HasMaxLength(50)
@@ -154,6 +233,7 @@ public partial class CambioSeguroP2pdbContext : DbContext
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.MontoDisponible).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.MontoMaximo).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.MontoMinimo).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.TasaCambio).HasColumnType("decimal(10, 4)");
@@ -161,12 +241,12 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.MonedaDestino).WithMany(p => p.OfertaMonedaDestino)
+            entity.HasOne(d => d.MonedaDestino).WithMany(p => p.OfertumMonedaDestinos)
                 .HasForeignKey(d => d.MonedaDestinoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Oferta_MonedaDestino");
 
-            entity.HasOne(d => d.MonedaOrigen).WithMany(p => p.OfertaMonedaOrigen)
+            entity.HasOne(d => d.MonedaOrigen).WithMany(p => p.OfertumMonedaOrigens)
                 .HasForeignKey(d => d.MonedaOrigenId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Oferta_MonedaOrigen");
@@ -179,7 +259,11 @@ public partial class CambioSeguroP2pdbContext : DbContext
 
         modelBuilder.Entity<Operacion>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Operacio__3214EC075CC94748");
+            entity.ToTable("Operacion");
+
+            entity.HasIndex(e => e.Estado, "IX_Operacion_Estado");
+
+            entity.HasIndex(e => e.CodigoOperacion, "UQ_Operacion_Codigo").IsUnique();
 
             entity.Property(e => e.CodigoOperacion)
                 .HasMaxLength(50)
@@ -194,17 +278,17 @@ public partial class CambioSeguroP2pdbContext : DbContext
             entity.Property(e => e.FechaLiberacion).HasColumnType("datetime");
             entity.Property(e => e.Monto).HasColumnType("decimal(10, 2)");
 
-            entity.HasOne(d => d.Comprador).WithMany(p => p.OperacionComprador)
+            entity.HasOne(d => d.Comprador).WithMany(p => p.OperacionCompradors)
                 .HasForeignKey(d => d.CompradorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Operacion_Comprador");
 
-            entity.HasOne(d => d.Oferta).WithMany(p => p.Operacion)
+            entity.HasOne(d => d.Oferta).WithMany(p => p.Operacions)
                 .HasForeignKey(d => d.OfertaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Operacion_Oferta");
 
-            entity.HasOne(d => d.Vendedor).WithMany(p => p.OperacionVendedor)
+            entity.HasOne(d => d.Vendedor).WithMany(p => p.OperacionVendedors)
                 .HasForeignKey(d => d.VendedorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Operacion_Vendedor");
@@ -212,16 +296,23 @@ public partial class CambioSeguroP2pdbContext : DbContext
 
         modelBuilder.Entity<ReporteAdministrativo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ReporteA__3214EC07950FE5BD");
+            entity.ToTable("ReporteAdministrativo");
+
+            entity.HasIndex(e => e.GeneradoPorUsuarioId, "IX_ReporteAdministrativo_Usuario");
 
             entity.Property(e => e.FechaGeneracion)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+
+            entity.HasOne(d => d.GeneradoPorUsuario).WithMany(p => p.ReporteAdministrativos)
+                .HasForeignKey(d => d.GeneradoPorUsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ReporteAdministrativo_Usuario");
         });
 
         modelBuilder.Entity<TemporizadorOperacion>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Temporiz__3214EC0746B71932");
+            entity.ToTable("TemporizadorOperacion");
 
             entity.Property(e => e.Estado)
                 .HasMaxLength(50)
@@ -229,7 +320,7 @@ public partial class CambioSeguroP2pdbContext : DbContext
             entity.Property(e => e.FechaFin).HasColumnType("datetime");
             entity.Property(e => e.FechaInicio).HasColumnType("datetime");
 
-            entity.HasOne(d => d.Operacion).WithMany(p => p.TemporizadorOperacion)
+            entity.HasOne(d => d.Operacion).WithMany(p => p.TemporizadorOperacions)
                 .HasForeignKey(d => d.OperacionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TemporizadorOperacion_Operacion");
@@ -237,9 +328,9 @@ public partial class CambioSeguroP2pdbContext : DbContext
 
         modelBuilder.Entity<Usuario>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Usuario__3214EC07A0DDEA0C");
+            entity.ToTable("Usuario");
 
-            entity.HasIndex(e => e.Correo, "UQ__Usuario__60695A19888EBA05").IsUnique();
+            entity.HasIndex(e => e.Correo, "UQ_Usuario_Correo").IsUnique();
 
             entity.Property(e => e.Correo)
                 .HasMaxLength(150)
@@ -269,7 +360,7 @@ public partial class CambioSeguroP2pdbContext : DbContext
 
         modelBuilder.Entity<VerificacionIdentidad>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Verifica__3214EC07DE341B0F");
+            entity.ToTable("VerificacionIdentidad");
 
             entity.Property(e => e.DocumentoIdentidad)
                 .HasMaxLength(30)
@@ -284,7 +375,7 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.Usuario).WithMany(p => p.VerificacionIdentidad)
+            entity.HasOne(d => d.Usuario).WithMany(p => p.VerificacionIdentidads)
                 .HasForeignKey(d => d.UsuarioId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_VerificacionIdentidad_Usuario");

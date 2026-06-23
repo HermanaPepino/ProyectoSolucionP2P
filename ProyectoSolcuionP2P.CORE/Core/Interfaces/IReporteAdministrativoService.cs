@@ -1,15 +1,13 @@
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 
 namespace ProyectoSolucionP2P.CORE.Core.Interfaces
 {
     public interface IReporteAdministrativoService
     {
-        Task<IEnumerable<ReporteAdministrativo>> GetAllAsync();
-        Task<ReporteAdministrativo?> GetByIdAsync(int id);
-        Task<ReporteAdministrativo> CreateAsync(ReporteAdministrativo entity);
-        Task UpdateAsync(ReporteAdministrativo entity);
-        Task DeleteAsync(int id);
+        Task<IEnumerable<ReporteAdministrativoDto>> GetAllAsync();
+        Task<ReporteAdministrativoDto?> GetByIdAsync(int id);
+        Task<ReporteAdministrativoDto> CreateAsync(ReporteAdministrativoDto dto);
+        Task<bool> UpdateAsync(int id, ReporteAdministrativoDto dto);
+        Task<bool> DeleteAsync(int id);
     }
 }

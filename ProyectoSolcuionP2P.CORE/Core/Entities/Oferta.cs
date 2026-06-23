@@ -21,6 +21,8 @@ public partial class Oferta
 
     public decimal MontoMaximo { get; set; }
 
+    public decimal? MontoDisponible { get; set; }
+
     public string Estado { get; set; } = null!;
 
     public DateTime? FechaCreacion { get; set; }
@@ -29,7 +31,9 @@ public partial class Oferta
 
     public virtual Moneda MonedaOrigen { get; set; } = null!;
 
-    public virtual ICollection<Operacion> Operacion { get; set; } = new List<Operacion>();
+    public virtual ICollection<OfertaMetodoPago> OfertaMetodoPagos { get; set; } = new List<OfertaMetodoPago>();
+
+    public virtual ICollection<Operacion> Operacions { get; set; } = new List<Operacion>();
 
     public virtual Usuario Usuario { get; set; } = null!;
 }

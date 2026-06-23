@@ -1,27 +1,67 @@
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Entities;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ProyectoSolucionP2P.CORE.Core.Services
 {
     public class ReporteAdministrativoService : IReporteAdministrativoService
     {
         private readonly IReporteAdministrativoRepository _repo;
+        public ReporteAdministrativoService(IReporteAdministrativoRepository repo) { _repo = repo; }
 
-        public ReporteAdministrativoService(IReporteAdministrativoRepository repo)
+        public async Task<IEnumerable<ReporteAdministrativoDto>> GetAllAsync()
+            => (await _repo.GetAllAsync()).Select(MapToDto);
+
+        public async Task<ReporteAdministrativoDto?> GetByIdAsync(int id)
         {
-            _repo = repo;
+            var e = await _repo.GetByIdAsync(id);
+            return e == null ? null : MapToDto(e);
         }
 
-        public Task<ReporteAdministrativo> CreateAsync(ReporteAdministrativo entity) => _repo.CreateAsync(entity);
+        public async Task<ReporteAdministrativoDto> CreateAsync(ReporteAdministrativoDto dto)
+        {
+            var e = new ReporteAdministrativo 
+            { 
+                GeneradoPorUsuarioId = dto.GeneradoPorUsuarioId,
+                FechaGeneracion = dto.FechaGeneracion,
+                TotalOperaciones = dto.TotalOperaciones,
+                TotalDisputas = dto.TotalDisputas,
+                TotalUsuarios = dto.TotalUsuarios
+            };
+            var creado = await _repo.CreateAsync(e);
+            dto.Id = creado.Id;
+            return MapToDto(creado);
+        }
 
-        public Task DeleteAsync(int id) => _repo.DeleteAsync(id);
+        public async Task<bool> UpdateAsync(int id, ReporteAdministrativoDto dto)
+        {
+            var e = await _repo.GetByIdAsync(id);
+            if (e == null) return false;
+            e.GeneradoPorUsuarioId = dto.GeneradoPorUsuarioId;
+            e.FechaGeneracion = dto.FechaGeneracion;
+            e.TotalOperaciones = dto.TotalOperaciones;
+            e.TotalDisputas = dto.TotalDisputas;
+            e.TotalUsuarios = dto.TotalUsuarios;
+            await _repo.UpdateAsync(e);
+            return true;
+        }
 
-        public Task<IEnumerable<ReporteAdministrativo>> GetAllAsync() => _repo.GetAllAsync();
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var e = await _repo.GetByIdAsync(id);
+            if (e == null) return false;
+            await _repo.DeleteAsync(id);
+            return true;
+        }
 
-        public Task<ReporteAdministrativo?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
-
-        public Task UpdateAsync(ReporteAdministrativo entity) => _repo.UpdateAsync(entity);
+        private static ReporteAdministrativoDto MapToDto(ReporteAdministrativo e) => new ReporteAdministrativoDto
+        {
+            Id = e.Id,
+            GeneradoPorUsuarioId = e.GeneradoPorUsuarioId,
+            FechaGeneracion = e.FechaGeneracion,
+            TotalOperaciones = e.TotalOperaciones,
+            TotalDisputas = e.TotalDisputas,
+            TotalUsuarios = e.TotalUsuarios
+        };
     }
 }

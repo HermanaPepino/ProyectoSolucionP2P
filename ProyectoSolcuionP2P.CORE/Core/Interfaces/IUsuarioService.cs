@@ -1,15 +1,14 @@
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using ProyectoSolucionP2P.CORE.Core.DTOs;
 
 namespace ProyectoSolucionP2P.CORE.Core.Interfaces
 {
     public interface IUsuarioService
     {
-        Task<IEnumerable<Usuario>> GetAllAsync();
-        Task<Usuario?> GetByIdAsync(int id);
-        Task<Usuario> CreateAsync(Usuario entity);
-        Task UpdateAsync(Usuario entity);
-        Task DeleteAsync(int id);
+        Task<IEnumerable<UsuarioDto>> GetAllAsync();
+        Task<UsuarioDto?> GetByIdAsync(int id);
+        Task<UsuarioDto?> RegistrarAsync(UsuarioRegistroDto dto);   // HU-001
+        Task<UsuarioDto?> LoginAsync(LoginDto dto);                 // HU-002
+        Task<bool> UpdateAsync(int id, UsuarioRegistroDto dto);
+        Task<bool> DeleteAsync(int id);
     }
 }

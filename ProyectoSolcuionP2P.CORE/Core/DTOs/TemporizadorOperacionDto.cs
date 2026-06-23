@@ -1,5 +1,3 @@
-using System;
-
 namespace ProyectoSolucionP2P.CORE.Core.DTOs
 {
     public class TemporizadorOperacionDto

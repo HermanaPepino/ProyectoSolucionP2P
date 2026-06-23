@@ -1,15 +1,13 @@
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 
 namespace ProyectoSolucionP2P.CORE.Core.Interfaces
 {
     public interface ITemporizadorOperacionService
     {
-        Task<IEnumerable<TemporizadorOperacion>> GetAllAsync();
-        Task<TemporizadorOperacion?> GetByIdAsync(int id);
-        Task<TemporizadorOperacion> CreateAsync(TemporizadorOperacion entity);
-        Task UpdateAsync(TemporizadorOperacion entity);
-        Task DeleteAsync(int id);
+        Task<IEnumerable<TemporizadorOperacionDto>> GetAllAsync();
+        Task<TemporizadorOperacionDto?> GetByIdAsync(int id);
+        Task<TemporizadorOperacionDto> CreateAsync(TemporizadorOperacionDto dto);
+        Task<bool> UpdateAsync(int id, TemporizadorOperacionDto dto);
+        Task<bool> DeleteAsync(int id);
     }
 }

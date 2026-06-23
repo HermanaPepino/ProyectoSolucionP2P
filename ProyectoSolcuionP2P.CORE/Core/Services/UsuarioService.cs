@@ -1,7 +1,6 @@
+﻿using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Entities;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ProyectoSolucionP2P.CORE.Core.Services
 {
@@ -14,14 +13,81 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             _repo = repo;
         }
 
-        public Task<Usuario> CreateAsync(Usuario entity) => _repo.CreateAsync(entity);
+        public async Task<IEnumerable<UsuarioDto>> GetAllAsync()
+        {
+            var lista = await _repo.GetAllAsync();
+            return lista.Select(MapToDto);
+        }
 
-        public Task DeleteAsync(int id) => _repo.DeleteAsync(id);
+        public async Task<UsuarioDto?> GetByIdAsync(int id)
+        {
+            var u = await _repo.GetByIdAsync(id);
+            return u == null ? null : MapToDto(u);
+        }
 
-        public Task<IEnumerable<Usuario>> GetAllAsync() => _repo.GetAllAsync();
+        // HU-001: Registro
+        public async Task<UsuarioDto?> RegistrarAsync(UsuarioRegistroDto dto)
+        {
+            // correo único
+            var existe = await _repo.GetByCorreoAsync(dto.Correo);
+            if (existe != null) return null;
 
-        public Task<Usuario?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
+            var nuevo = new Usuario
+            {
+                NombreCompleto = dto.NombreCompleto,
+                Correo = dto.Correo,
+                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password), // se guarda el HASH
+                Telefono = dto.Telefono,
+                Rol = "Usuario",
+                EstadoVerificacion = "Pendiente",
+                Reputacion = 0,
+                FechaRegistro = DateTime.Now
+            };
 
-        public Task UpdateAsync(Usuario entity) => _repo.UpdateAsync(entity);
+            var creado = await _repo.CreateAsync(nuevo);
+            return MapToDto(creado);
+        }
+
+        // HU-002: Login
+        public async Task<UsuarioDto?> LoginAsync(LoginDto dto)
+        {
+            var u = await _repo.GetByCorreoAsync(dto.Correo);
+            if (u == null) return null;
+
+            bool ok = BCrypt.Net.BCrypt.Verify(dto.Password, u.Password);
+            return ok ? MapToDto(u) : null;
+        }
+
+        public async Task<bool> UpdateAsync(int id, UsuarioRegistroDto dto)
+        {
+            var u = await _repo.GetByIdAsync(id);
+            if (u == null) return false;
+
+            u.NombreCompleto = dto.NombreCompleto;
+            u.Telefono = dto.Telefono;
+            await _repo.UpdateAsync(u);
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var u = await _repo.GetByIdAsync(id);
+            if (u == null) return false;
+            await _repo.DeleteAsync(id);
+            return true;
+        }
+
+        // Mapea Entidad -> DTO (sin exponer el Password)
+        private static UsuarioDto MapToDto(Usuario u) => new UsuarioDto
+        {
+            Id = u.Id,
+            NombreCompleto = u.NombreCompleto,
+            Correo = u.Correo,
+            Telefono = u.Telefono,
+            Rol = u.Rol,
+            EstadoVerificacion = u.EstadoVerificacion,
+            Reputacion = u.Reputacion,
+            FechaRegistro = u.FechaRegistro
+        };
     }
 }

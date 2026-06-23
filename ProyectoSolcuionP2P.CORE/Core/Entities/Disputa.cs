@@ -17,5 +17,7 @@ public partial class Disputa
 
     public DateTime? FechaRegistro { get; set; }
 
+    public virtual ICollection<EvidenciaDisputa> EvidenciaDisputa { get; set; } = new List<EvidenciaDisputa>();
+
     public virtual Operacion Operacion { get; set; } = null!;
 }

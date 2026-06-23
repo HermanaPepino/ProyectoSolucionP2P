@@ -11,7 +11,7 @@ public partial class Moneda
 
     public string Nombre { get; set; } = null!;
 
-    public virtual ICollection<Oferta> OfertaMonedaDestino { get; set; } = new List<Oferta>();
+    public virtual ICollection<Oferta> OfertumMonedaDestinos { get; set; } = new List<Oferta>();
 
-    public virtual ICollection<Oferta> OfertaMonedaOrigen { get; set; } = new List<Oferta>();
+    public virtual ICollection<Oferta> OfertumMonedaOrigens { get; set; } = new List<Oferta>();
 }

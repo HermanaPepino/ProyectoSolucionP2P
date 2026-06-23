@@ -1,27 +1,69 @@
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Entities;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ProyectoSolucionP2P.CORE.Core.Services
 {
     public class MensajeService : IMensajeService
     {
         private readonly IMensajeRepository _repo;
+        public MensajeService(IMensajeRepository repo) { _repo = repo; }
 
-        public MensajeService(IMensajeRepository repo)
+        public async Task<IEnumerable<MensajeDto>> GetAllAsync()
+            => (await _repo.GetAllAsync()).Select(MapToDto);
+
+        public async Task<MensajeDto?> GetByIdAsync(int id)
         {
-            _repo = repo;
+            var e = await _repo.GetByIdAsync(id);
+            return e == null ? null : MapToDto(e);
         }
 
-        public Task<Mensaje> CreateAsync(Mensaje entity) => _repo.CreateAsync(entity);
+        public async Task<MensajeDto> CreateAsync(MensajeDto dto)
+        {
+            var e = new Mensaje 
+            { 
+                RemitenteId = dto.RemitenteId,
+                DestinatarioId = dto.DestinatarioId,
+                OperacionId = dto.OperacionId,
+                Contenido = dto.Contenido,
+                FechaEnvio = dto.FechaEnvio
+            };
+            var creado = await _repo.CreateAsync(e);
+            dto.Id = creado.Id;
+            return MapToDto(creado);
+        }
 
-        public Task DeleteAsync(int id) => _repo.DeleteAsync(id);
+        public async Task<bool> UpdateAsync(int id, MensajeDto dto)
+        {
+            var e = await _repo.GetByIdAsync(id);
+            if (e == null) return false;
+            e.RemitenteId = dto.RemitenteId;
+            e.DestinatarioId = dto.DestinatarioId;
+            e.OperacionId = dto.OperacionId;
+            e.Contenido = dto.Contenido;
+            e.FechaEnvio = dto.FechaEnvio;
+            await _repo.UpdateAsync(e);
+            return true;
+        }
 
-        public Task<IEnumerable<Mensaje>> GetAllAsync() => _repo.GetAllAsync();
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var e = await _repo.GetByIdAsync(id);
+            if (e == null) return false;
+            await _repo.DeleteAsync(id);
+            return true;
+        }
 
-        public Task<Mensaje?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
-
-        public Task UpdateAsync(Mensaje entity) => _repo.UpdateAsync(entity);
+        private static MensajeDto MapToDto(Mensaje e) => new MensajeDto
+        {
+            Id = e.Id,
+            RemitenteId = e.RemitenteId,
+            DestinatarioId = e.DestinatarioId,
+            OperacionId = e.OperacionId,
+            RemitenteNombre = e.Remitente?.NombreCompleto ?? string.Empty,
+            DestinatarioNombre = e.Destinatario?.NombreCompleto ?? string.Empty,
+            Contenido = e.Contenido,
+            FechaEnvio = e.FechaEnvio
+        };
     }
 }

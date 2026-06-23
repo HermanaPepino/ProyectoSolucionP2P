@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using ProyectoSolucionP2P.CORE.Core.Interfaces;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
+using ProyectoSolucionP2P.CORE.Core.Interfaces;
 
 namespace ProyectoSolucionP2P.API.Controllers
 {
@@ -13,94 +9,31 @@ namespace ProyectoSolucionP2P.API.Controllers
     public class TemporizadorOperacionController : ControllerBase
     {
         private readonly ITemporizadorOperacionService _service;
-
-        public TemporizadorOperacionController(ITemporizadorOperacionService service)
-        {
-            _service = service;
-        }
+        public TemporizadorOperacionController(ITemporizadorOperacionService service) { _service = service; }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            var dtos = list.Select(t => new TemporizadorOperacionDto
-            {
-                Id = t.Id,
-                OperacionId = t.OperacionId,
-                FechaInicio = t.FechaInicio,
-                FechaFin = t.FechaFin,
-                Estado = t.Estado
-            });
-            return Ok(dtos);
-        }
+        public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var ent = await _service.GetByIdAsync(id);
-            if (ent == null) return NotFound();
-            var dto = new TemporizadorOperacionDto
-            {
-                Id = ent.Id,
-                OperacionId = ent.OperacionId,
-                FechaInicio = ent.FechaInicio,
-                FechaFin = ent.FechaFin,
-                Estado = ent.Estado
-            };
-            return Ok(dto);
+            var dto = await _service.GetByIdAsync(id);
+            return dto == null ? NotFound() : Ok(dto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(TemporizadorOperacionDto model)
+        public async Task<IActionResult> Create(TemporizadorOperacionDto dto)
         {
-            var entity = new TemporizadorOperacion
-            {
-                OperacionId = model.OperacionId,
-                FechaInicio = model.FechaInicio,
-                FechaFin = model.FechaFin,
-                Estado = model.Estado
-            };
-
-            var created = await _service.CreateAsync(entity);
-            var createdDto = new TemporizadorOperacionDto
-            {
-                Id = created.Id,
-                OperacionId = created.OperacionId,
-                FechaInicio = created.FechaInicio,
-                FechaFin = created.FechaFin,
-                Estado = created.Estado
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, createdDto);
+            var creado = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, TemporizadorOperacionDto model)
-        {
-            if (id != model.Id) return BadRequest();
-            var exists = await _service.GetByIdAsync(id);
-            if (exists == null) return NotFound();
-
-            var entity = new TemporizadorOperacion
-            {
-                Id = model.Id,
-                OperacionId = model.OperacionId,
-                FechaInicio = model.FechaInicio,
-                FechaFin = model.FechaFin,
-                Estado = model.Estado
-            };
-
-            await _service.UpdateAsync(entity);
-            return NoContent();
-        }
+        public async Task<IActionResult> Update(int id, TemporizadorOperacionDto dto)
+            => await _service.UpdateAsync(id, dto) ? NoContent() : NotFound();
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
-        {
-            var exists = await _service.GetByIdAsync(id);
-            if (exists == null) return NotFound();
-            await _service.DeleteAsync(id);
-            return NoContent();
-        }
+            => await _service.DeleteAsync(id) ? NoContent() : NotFound();
     }
 }

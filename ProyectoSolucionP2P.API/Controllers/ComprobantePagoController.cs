@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using ProyectoSolucionP2P.CORE.Core.Entities;
-using ProyectoSolucionP2P.CORE.Core.Interfaces;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
+using ProyectoSolucionP2P.CORE.Core.Interfaces;
 
 namespace ProyectoSolucionP2P.API.Controllers
 {
@@ -13,89 +9,31 @@ namespace ProyectoSolucionP2P.API.Controllers
     public class ComprobantePagoController : ControllerBase
     {
         private readonly IComprobantePagoService _service;
-
-        public ComprobantePagoController(IComprobantePagoService service)
-        {
-            _service = service;
-        }
+        public ComprobantePagoController(IComprobantePagoService service) { _service = service; }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var list = await _service.GetAllAsync();
-            var dtos = list.Select(c => new ComprobantePagoDto
-            {
-                Id = c.Id,
-                OperacionId = c.OperacionId,
-                RutaArchivo = c.RutaArchivo,
-                FechaSubida = c.FechaSubida
-            });
-            return Ok(dtos);
-        }
+        public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var ent = await _service.GetByIdAsync(id);
-            if (ent == null) return NotFound();
-            var dto = new ComprobantePagoDto
-            {
-                Id = ent.Id,
-                OperacionId = ent.OperacionId,
-                RutaArchivo = ent.RutaArchivo,
-                FechaSubida = ent.FechaSubida
-            };
-            return Ok(dto);
+            var dto = await _service.GetByIdAsync(id);
+            return dto == null ? NotFound() : Ok(dto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ComprobantePagoDto model)
+        public async Task<IActionResult> Create(ComprobantePagoDto dto)
         {
-            var entity = new ComprobantePago
-            {
-                OperacionId = model.OperacionId,
-                RutaArchivo = model.RutaArchivo,
-                FechaSubida = model.FechaSubida
-            };
-
-            var created = await _service.CreateAsync(entity);
-            var createdDto = new ComprobantePagoDto
-            {
-                Id = created.Id,
-                OperacionId = created.OperacionId,
-                RutaArchivo = created.RutaArchivo,
-                FechaSubida = created.FechaSubida
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, createdDto);
+            var creado = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, ComprobantePagoDto model)
-        {
-            if (id != model.Id) return BadRequest();
-            var exists = await _service.GetByIdAsync(id);
-            if (exists == null) return NotFound();
-
-            var entity = new ComprobantePago
-            {
-                Id = model.Id,
-                OperacionId = model.OperacionId,
-                RutaArchivo = model.RutaArchivo,
-                FechaSubida = model.FechaSubida
-            };
-
-            await _service.UpdateAsync(entity);
-            return NoContent();
-        }
+        public async Task<IActionResult> Update(int id, ComprobantePagoDto dto)
+            => await _service.UpdateAsync(id, dto) ? NoContent() : NotFound();
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
-        {
-            var exists = await _service.GetByIdAsync(id);
-            if (exists == null) return NotFound();
-            await _service.DeleteAsync(id);
-            return NoContent();
-        }
+            => await _service.DeleteAsync(id) ? NoContent() : NotFound();
     }
 }
