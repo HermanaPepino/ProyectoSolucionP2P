@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
@@ -6,6 +7,7 @@ namespace ProyectoSolucionP2P.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class DisputaController : ControllerBase
     {
         private readonly IDisputaService _service;
@@ -29,6 +31,7 @@ namespace ProyectoSolucionP2P.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Update(int id, DisputaDto dto)
             => await _service.UpdateAsync(id, dto) ? NoContent() : NotFound();
 

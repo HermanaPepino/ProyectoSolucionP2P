@@ -7,10 +7,12 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
     public class UsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepository _repo;
+        private readonly IJwtService _jwt;
 
-        public UsuarioService(IUsuarioRepository repo)
+        public UsuarioService(IUsuarioRepository repo, IJwtService jwt)
         {
             _repo = repo;
+            _jwt = jwt;
         }
 
         public async Task<IEnumerable<UsuarioDto>> GetAllAsync()
@@ -28,7 +30,6 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
         // HU-001: Registro
         public async Task<UsuarioDto?> RegistrarAsync(UsuarioRegistroDto dto)
         {
-            // correo único
             var existe = await _repo.GetByCorreoAsync(dto.Correo);
             if (existe != null) return null;
 
@@ -36,7 +37,7 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             {
                 NombreCompleto = dto.NombreCompleto,
                 Correo = dto.Correo,
-                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password), // se guarda el HASH
+                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Telefono = dto.Telefono,
                 Rol = "Usuario",
                 EstadoVerificacion = "Pendiente",
@@ -48,14 +49,20 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             return MapToDto(creado);
         }
 
-        // HU-002: Login
-        public async Task<UsuarioDto?> LoginAsync(LoginDto dto)
+        // HU-002: Login (devuelve token + usuario)
+        public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
         {
             var u = await _repo.GetByCorreoAsync(dto.Correo);
             if (u == null) return null;
 
             bool ok = BCrypt.Net.BCrypt.Verify(dto.Password, u.Password);
-            return ok ? MapToDto(u) : null;
+            if (!ok) return null;
+
+            return new AuthResponseDto
+            {
+                Token = _jwt.GenerarToken(u),
+                Usuario = MapToDto(u)
+            };
         }
 
         public async Task<bool> UpdateAsync(int id, UsuarioRegistroDto dto)
