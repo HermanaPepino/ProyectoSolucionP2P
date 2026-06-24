@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace ProyectoSolucionP2P.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class OfertaController : ControllerBase
     {
         private readonly IOfertaService _service;

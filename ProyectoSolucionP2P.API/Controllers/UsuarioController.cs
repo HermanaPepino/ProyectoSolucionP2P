@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ProyectoSolucionP2P.API.Controllers
 {
@@ -28,6 +29,7 @@ namespace ProyectoSolucionP2P.API.Controllers
 
         // HU-001
         [HttpPost("registrar")]
+        [AllowAnonymous]
         public async Task<IActionResult> Registrar(UsuarioRegistroDto dto)
         {
             var creado = await _service.RegistrarAsync(dto);
@@ -37,10 +39,11 @@ namespace ProyectoSolucionP2P.API.Controllers
 
         // HU-002
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var u = await _service.LoginAsync(dto);
-            return u == null ? Unauthorized("Correo o contraseña incorrectos.") : Ok(u);
+            var resp = await _service.LoginAsync(dto);
+            return resp == null ? Unauthorized("Correo o contraseña incorrectos.") : Ok(resp);
         }
 
         [HttpPut("{id}")]

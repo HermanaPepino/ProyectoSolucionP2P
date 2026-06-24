@@ -7,7 +7,7 @@ namespace ProyectoSolucionP2P.CORE.Core.Interfaces
         Task<IEnumerable<UsuarioDto>> GetAllAsync();
         Task<UsuarioDto?> GetByIdAsync(int id);
         Task<UsuarioDto?> RegistrarAsync(UsuarioRegistroDto dto);   // HU-001
-        Task<UsuarioDto?> LoginAsync(LoginDto dto);                 // HU-002
+        Task<AuthResponseDto?> LoginAsync(LoginDto dto);            // HU-002
         Task<bool> UpdateAsync(int id, UsuarioRegistroDto dto);
         Task<bool> DeleteAsync(int id);
     }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
@@ -6,6 +7,7 @@ namespace ProyectoSolucionP2P.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ComprobantePagoController : ControllerBase
     {
         private readonly IComprobantePagoService _service;
