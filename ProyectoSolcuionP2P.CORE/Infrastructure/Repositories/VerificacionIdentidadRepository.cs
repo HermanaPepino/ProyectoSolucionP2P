@@ -11,10 +11,30 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
         public VerificacionIdentidadRepository(CambioSeguroP2pdbContext db) { _db = db; }
 
         public async Task<IEnumerable<VerificacionIdentidad>> GetAllAsync()
-            => await _db.Set<VerificacionIdentidad>().AsNoTracking().ToListAsync();
-
+        {
+            return await _db.Set<VerificacionIdentidad>()
+            .Include(v => v.Usuario)
+            .ToListAsync();
+        }
+        public async Task<IEnumerable<VerificacionIdentidad>> GetPendientesAsync()
+        {
+            return await _db.Set<VerificacionIdentidad>()
+                .Include(v => v.Usuario)
+                .Where(v => v.EstadoVerificacion == "Pendiente")
+                .ToListAsync();
+        }
         public async Task<VerificacionIdentidad?> GetByIdAsync(int id)
-            => await _db.Set<VerificacionIdentidad>().FindAsync(id);
+        {
+            return await _db.Set<VerificacionIdentidad>()
+            .Include(v => v.Usuario)
+            .FirstOrDefaultAsync(v => v.Id == id);
+        }
+
+        public async Task<VerificacionIdentidad?> GetByUsuarioIdAsync(int usuarioId)
+        {
+            return await _db.Set<VerificacionIdentidad>()
+                .FirstOrDefaultAsync(v => v.UsuarioId == usuarioId);
+        }
 
         public async Task<VerificacionIdentidad> CreateAsync(VerificacionIdentidad entity)
         {
@@ -25,7 +45,13 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
 
         public async Task UpdateAsync(VerificacionIdentidad entity)
         {
-            _db.Set<VerificacionIdentidad>().Update(entity);
+            _db.Entry(entity).State = EntityState.Modified;
+
+            if (entity.Usuario != null)
+            {
+                _db.Entry(entity.Usuario).State = EntityState.Modified;
+            }
+
             await _db.SaveChangesAsync();
         }
 

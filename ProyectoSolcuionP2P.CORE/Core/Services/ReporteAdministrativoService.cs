@@ -17,7 +17,10 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             var e = await _repo.GetByIdAsync(id);
             return e == null ? null : MapToDto(e);
         }
-
+        public async Task<DashboardAdministrativoDto> ObtenerDashboardAsync()
+        {
+            return await _repo.ObtenerDashboardAsync();
+        }
         public async Task<ReporteAdministrativoDto> CreateAsync(ReporteAdministrativoDto dto)
         {
             var e = new ReporteAdministrativo 

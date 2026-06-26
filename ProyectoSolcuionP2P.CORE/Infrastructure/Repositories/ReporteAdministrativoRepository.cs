@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ProyectoSolucionP2P.CORE.Core.Entities;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
 using ProyectoSolucionP2P.CORE.Infrastructure.Data;
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 
 namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
 {
@@ -15,7 +16,20 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
 
         public async Task<ReporteAdministrativo?> GetByIdAsync(int id)
             => await _db.Set<ReporteAdministrativo>().FindAsync(id);
+        public async Task<DashboardAdministrativoDto> ObtenerDashboardAsync()
+        {
+            return new DashboardAdministrativoDto
+            {
+                TotalUsuarios = await _db.Set<Usuario>().CountAsync(),
 
+                TotalOperaciones = await _db.Set<Operacion>().CountAsync(),
+
+                TotalDisputas = await _db.Set<Disputa>().CountAsync(),
+
+                VerificacionesPendientes = await _db.Set<VerificacionIdentidad>()
+                    .CountAsync(v => v.EstadoVerificacion == "Pendiente")
+            };
+        }
         public async Task<ReporteAdministrativo> CreateAsync(ReporteAdministrativo entity)
         {
             _db.Set<ReporteAdministrativo>().Add(entity);

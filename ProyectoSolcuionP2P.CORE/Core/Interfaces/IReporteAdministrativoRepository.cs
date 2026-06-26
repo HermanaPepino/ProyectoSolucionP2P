@@ -1,3 +1,4 @@
+using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Entities;
 
 namespace ProyectoSolucionP2P.CORE.Core.Interfaces
@@ -9,5 +10,6 @@ namespace ProyectoSolucionP2P.CORE.Core.Interfaces
         Task<ReporteAdministrativo> CreateAsync(ReporteAdministrativo entity);
         Task UpdateAsync(ReporteAdministrativo entity);
         Task DeleteAsync(int id);
+        Task<DashboardAdministrativoDto> ObtenerDashboardAsync();
     }
 }

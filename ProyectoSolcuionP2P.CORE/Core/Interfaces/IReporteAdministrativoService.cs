@@ -9,5 +9,6 @@ namespace ProyectoSolucionP2P.CORE.Core.Interfaces
         Task<ReporteAdministrativoDto> CreateAsync(ReporteAdministrativoDto dto);
         Task<bool> UpdateAsync(int id, ReporteAdministrativoDto dto);
         Task<bool> DeleteAsync(int id);
+        Task<DashboardAdministrativoDto> ObtenerDashboardAsync();
     }
 }

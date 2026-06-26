@@ -8,5 +8,7 @@ namespace ProyectoSolucionP2P.CORE.Core.DTOs
         public string TipoDocumento { get; set; } = null!;
         public string EstadoVerificacion { get; set; } = null!;
         public DateTime? FechaRegistro { get; set; }
+        public string? NombreCompleto { get; set; }
+        public string? Correo { get; set; }
     }
 }

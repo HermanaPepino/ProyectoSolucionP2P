@@ -37,5 +37,11 @@ namespace ProyectoSolucionP2P.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
             => await _service.DeleteAsync(id) ? NoContent() : NotFound();
+
+        [HttpGet("dashboard")]
+        public async Task<IActionResult> Dashboard()
+        {
+            return Ok(await _service.ObtenerDashboardAsync());
+        }
     }
 }
