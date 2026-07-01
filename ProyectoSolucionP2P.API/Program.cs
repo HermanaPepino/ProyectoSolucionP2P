@@ -82,6 +82,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
 app.UseCors("dev");
+app.UseStaticFiles();      // sirve /uploads/comprobantes/*
 app.UseAuthentication();   // primero: ¿quién eres?
 app.UseAuthorization();    // luego: ¿puedes entrar?
 app.MapControllers();

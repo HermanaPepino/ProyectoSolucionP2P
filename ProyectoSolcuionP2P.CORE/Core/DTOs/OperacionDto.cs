@@ -14,5 +14,10 @@ namespace ProyectoSolucionP2P.CORE.Core.DTOs
         public DateTime? FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }
         public DateTime? FechaLiberacion { get; set; }
+
+        // Datos del temporizador de seguridad 
+        public DateTime? TemporizadorFechaFin { get; set; }
+        public string? TemporizadorEstado { get; set; }
+        public int? SegundosRestantes { get; set; }
     }
 }

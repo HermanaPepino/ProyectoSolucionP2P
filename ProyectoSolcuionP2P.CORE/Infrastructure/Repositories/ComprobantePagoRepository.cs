@@ -16,6 +16,12 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
         public async Task<ComprobantePago?> GetByIdAsync(int id)
             => await _db.Set<ComprobantePago>().FindAsync(id);
 
+        public async Task<ComprobantePago?> GetByOperacionIdAsync(int operacionId)
+            => await _db.Set<ComprobantePago>()
+                .Where(c => c.OperacionId == operacionId)
+                .OrderByDescending(c => c.Id)
+                .FirstOrDefaultAsync();
+
         public async Task<ComprobantePago> CreateAsync(ComprobantePago entity)
         {
             _db.Set<ComprobantePago>().Add(entity);
