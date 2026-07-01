@@ -16,6 +16,12 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
         public async Task<TemporizadorOperacion?> GetByIdAsync(int id)
             => await _db.Set<TemporizadorOperacion>().FindAsync(id);
 
+        public async Task<TemporizadorOperacion?> GetByOperacionIdAsync(int operacionId)
+            => await _db.Set<TemporizadorOperacion>()
+                .Where(t => t.OperacionId == operacionId)
+                .OrderByDescending(t => t.Id)
+                .FirstOrDefaultAsync();
+
         public async Task<TemporizadorOperacion> CreateAsync(TemporizadorOperacion entity)
         {
             _db.Set<TemporizadorOperacion>().Add(entity);
