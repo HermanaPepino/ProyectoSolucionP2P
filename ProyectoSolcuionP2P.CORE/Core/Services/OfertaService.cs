@@ -68,6 +68,7 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
         {
             Id = e.Id,
             UsuarioId = e.UsuarioId,
+            NombreVendedor = e.Usuario?.NombreCompleto,
             MonedaOrigenId = e.MonedaOrigenId,
             MonedaDestinoId = e.MonedaDestinoId,
             MonedaOrigenNombre = e.MonedaOrigen?.Nombre ?? string.Empty,

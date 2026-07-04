@@ -4,6 +4,7 @@ namespace ProyectoSolucionP2P.CORE.Core.DTOs
     {
         public int Id { get; set; }
         public int UsuarioId { get; set; }
+        public string? NombreVendedor { get; set; }
         public int MonedaOrigenId { get; set; }
         public int MonedaDestinoId { get; set; }
         public string MonedaOrigenNombre { get; set; } = null!;

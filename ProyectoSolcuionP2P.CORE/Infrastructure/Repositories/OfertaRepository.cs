@@ -12,6 +12,7 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
 
         public async Task<IEnumerable<Oferta>> GetAllAsync()
             => await _db.Set<Oferta>()
+                .Include(o => o.Usuario)
                 .Include(o => o.MonedaOrigen)
                 .Include(o => o.MonedaDestino)
                 .AsNoTracking()
@@ -19,6 +20,7 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
 
         public async Task<Oferta?> GetByIdAsync(int id)
             => await _db.Set<Oferta>()
+                .Include(o => o.Usuario)
                 .Include(o => o.MonedaOrigen)
                 .Include(o => o.MonedaDestino)
                 .FirstOrDefaultAsync(o => o.Id == id);
