@@ -19,6 +19,16 @@ public partial class Operacion
 
     public string CodigoOperacion { get; set; } = null!;
 
+    public int? OfertaMetodoPagoId { get; set; }
+
+    public int? MetodoPagoId { get; set; }
+
+    public int? UsuarioMetodoPagoId { get; set; }
+
+    public string? DatosPagoComprador { get; set; }
+
+    public string? ResumenPagoComprador { get; set; }
+
     public DateTime? FechaInicio { get; set; }
 
     public DateTime? FechaFin { get; set; }
@@ -42,4 +52,9 @@ public partial class Operacion
     public virtual ICollection<TemporizadorOperacion> TemporizadorOperacions { get; set; } = new List<TemporizadorOperacion>();
 
     public virtual Usuario Vendedor { get; set; } = null!;
+    public virtual OfertaMetodoPago? OfertaMetodoPago { get; set; }
+
+    public virtual MetodoPago? MetodoPago { get; set; }
+
+    public virtual UsuarioMetodoPago? UsuarioMetodoPago { get; set; }
 }

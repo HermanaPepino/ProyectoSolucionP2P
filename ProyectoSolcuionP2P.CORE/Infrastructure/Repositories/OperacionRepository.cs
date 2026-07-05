@@ -8,19 +8,28 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
     public class OperacionRepository : IOperacionRepository
     {
         private readonly CambioSeguroP2pdbContext _db;
-        public OperacionRepository(CambioSeguroP2pdbContext db) { _db = db; }
 
-        public async Task<IEnumerable<Operacion>> GetAllAsync()
-            => await _db.Set<Operacion>()
+        public OperacionRepository(CambioSeguroP2pdbContext db)
+        {
+            _db = db;
+        }
+
+        private IQueryable<Operacion> QueryCompleto()
+            => _db.Set<Operacion>()
                 .Include(o => o.Comprador)
                 .Include(o => o.Vendedor)
+                .Include(o => o.OfertaMetodoPago)
+                    .ThenInclude(omp => omp.MetodoPago)
+                .Include(o => o.MetodoPago)
+                .Include(o => o.UsuarioMetodoPago);
+
+        public async Task<IEnumerable<Operacion>> GetAllAsync()
+            => await QueryCompleto()
                 .AsNoTracking()
                 .ToListAsync();
 
         public async Task<Operacion?> GetByIdAsync(int id)
-            => await _db.Set<Operacion>()
-                .Include(o => o.Comprador)
-                .Include(o => o.Vendedor)
+            => await QueryCompleto()
                 .FirstOrDefaultAsync(o => o.Id == id);
 
         public async Task<Operacion> CreateAsync(Operacion entity)
@@ -40,6 +49,7 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
         {
             var ent = await _db.Set<Operacion>().FindAsync(id);
             if (ent == null) return;
+
             _db.Set<Operacion>().Remove(ent);
             await _db.SaveChangesAsync();
         }

@@ -12,4 +12,8 @@ public partial class MetodoPago
     public bool Activo { get; set; }
 
     public virtual ICollection<OfertaMetodoPago> OfertaMetodoPagos { get; set; } = new List<OfertaMetodoPago>();
+
+    public virtual ICollection<UsuarioMetodoPago> UsuarioMetodoPagos { get; set; } = new List<UsuarioMetodoPago>();
+
+    public virtual ICollection<Operacion> Operacions { get; set; } = new List<Operacion>();
 }

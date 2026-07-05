@@ -40,4 +40,5 @@ public partial class Usuario
     public virtual ICollection<ReporteAdministrativo> ReporteAdministrativos { get; set; } = new List<ReporteAdministrativo>();
 
     public virtual ICollection<VerificacionIdentidad> VerificacionIdentidads { get; set; } = new List<VerificacionIdentidad>();
+    public virtual ICollection<UsuarioMetodoPago> UsuarioMetodoPagos { get; set; } = new List<UsuarioMetodoPago>();
 }
