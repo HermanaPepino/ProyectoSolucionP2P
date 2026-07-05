@@ -43,6 +43,7 @@ builder.Services.AddCors(o => o.AddPolicy("dev",
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IMonedaRepository, MonedaRepository>();
 builder.Services.AddScoped<IMetodoPagoRepository, MetodoPagoRepository>();
+builder.Services.AddScoped<IUsuarioMetodoPagoRepository, UsuarioMetodoPagoRepository>();
 builder.Services.AddScoped<IVerificacionIdentidadRepository, VerificacionIdentidadRepository>();
 builder.Services.AddScoped<IReporteAdministrativoRepository, ReporteAdministrativoRepository>();
 builder.Services.AddScoped<IOfertaRepository, OfertaRepository>();
@@ -60,6 +61,7 @@ builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IMonedaService, MonedaService>();
 builder.Services.AddScoped<IMetodoPagoService, MetodoPagoService>();
+builder.Services.AddScoped<IUsuarioMetodoPagoService, UsuarioMetodoPagoService>();
 builder.Services.AddScoped<IVerificacionIdentidadService, VerificacionIdentidadService>();
 builder.Services.AddScoped<IReporteAdministrativoService, ReporteAdministrativoService>();
 builder.Services.AddScoped<IOfertaService, OfertaService>();

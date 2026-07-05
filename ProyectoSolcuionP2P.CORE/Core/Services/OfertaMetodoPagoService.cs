@@ -20,13 +20,17 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
 
         public async Task<OfertaMetodoPagoDto> CreateAsync(OfertaMetodoPagoDto dto)
         {
-            var e = new OfertaMetodoPago 
-            { 
+            var e = new OfertaMetodoPago
+            {
                 OfertaId = dto.OfertaId,
-                MetodoPagoId = dto.MetodoPagoId
+                MetodoPagoId = dto.MetodoPagoId,
+                Alias = dto.Alias,
+                DatosRecepcion = dto.DatosRecepcion,
+                Instrucciones = dto.Instrucciones,
+                ResumenPublico = dto.ResumenPublico
             };
             var creado = await _repo.CreateAsync(e);
-            dto.Id = creado.Id;
+
             return MapToDto(creado);
         }
 
@@ -38,6 +42,10 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             e.MetodoPagoId = dto.MetodoPagoId;
             await _repo.UpdateAsync(e);
             return true;
+            e.Alias = dto.Alias;
+            e.DatosRecepcion = dto.DatosRecepcion;
+            e.Instrucciones = dto.Instrucciones;
+            e.ResumenPublico = dto.ResumenPublico;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -52,7 +60,12 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
         {
             Id = e.Id,
             OfertaId = e.OfertaId,
-            MetodoPagoId = e.MetodoPagoId
+            MetodoPagoId = e.MetodoPagoId,
+            MetodoPagoNombre = e.MetodoPago?.Nombre ?? string.Empty,
+            Alias = e.Alias,
+            DatosRecepcion = e.DatosRecepcion,
+            Instrucciones = e.Instrucciones,
+            ResumenPublico = e.ResumenPublico
         };
     }
 }

@@ -44,6 +44,8 @@ public partial class CambioSeguroP2pdbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+    public virtual DbSet<UsuarioMetodoPago> UsuarioMetodoPagos { get; set; }
+
     public virtual DbSet<VerificacionIdentidad> VerificacionIdentidads { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -210,6 +212,22 @@ public partial class CambioSeguroP2pdbContext : DbContext
 
             entity.HasIndex(e => new { e.OfertaId, e.MetodoPagoId }, "UQ_OfertaMetodoPago").IsUnique();
 
+            entity.Property(e => e.Alias)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.Property(e => e.DatosRecepcion)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+
+            entity.Property(e => e.Instrucciones)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+
+            entity.Property(e => e.ResumenPublico)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+
             entity.HasOne(d => d.MetodoPago).WithMany(p => p.OfertaMetodoPagos)
                 .HasForeignKey(d => d.MetodoPagoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -278,6 +296,14 @@ public partial class CambioSeguroP2pdbContext : DbContext
             entity.Property(e => e.FechaLiberacion).HasColumnType("datetime");
             entity.Property(e => e.Monto).HasColumnType("decimal(10, 2)");
 
+            entity.Property(e => e.DatosPagoComprador)
+                .HasMaxLength(700)
+                .IsUnicode(false);
+
+            entity.Property(e => e.ResumenPagoComprador)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+
             entity.HasOne(d => d.Comprador).WithMany(p => p.OperacionCompradors)
                 .HasForeignKey(d => d.CompradorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -292,6 +318,18 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .HasForeignKey(d => d.VendedorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Operacion_Vendedor");
+
+            entity.HasOne(d => d.OfertaMetodoPago).WithMany(p => p.Operacions)
+                .HasForeignKey(d => d.OfertaMetodoPagoId)
+                .HasConstraintName("FK_Operacion_OfertaMetodoPago");
+
+            entity.HasOne(d => d.MetodoPago).WithMany(p => p.Operacions)
+                .HasForeignKey(d => d.MetodoPagoId)
+                .HasConstraintName("FK_Operacion_MetodoPago");
+
+            entity.HasOne(d => d.UsuarioMetodoPago).WithMany(p => p.Operacions)
+                .HasForeignKey(d => d.UsuarioMetodoPagoId)
+                .HasConstraintName("FK_Operacion_UsuarioMetodoPago");
         });
 
         modelBuilder.Entity<ReporteAdministrativo>(entity =>
@@ -356,6 +394,40 @@ public partial class CambioSeguroP2pdbContext : DbContext
             entity.Property(e => e.Telefono)
                 .HasMaxLength(20)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<UsuarioMetodoPago>(entity =>
+        {
+            entity.ToTable("UsuarioMetodoPago");
+
+            entity.Property(e => e.Alias)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.Property(e => e.DatosPago)
+                .HasMaxLength(700)
+                .IsUnicode(false);
+
+            entity.Property(e => e.ResumenPublico)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+
+            entity.Property(e => e.Activo)
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Usuario).WithMany(p => p.UsuarioMetodoPagos)
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UsuarioMetodoPago_Usuario");
+
+            entity.HasOne(d => d.MetodoPago).WithMany(p => p.UsuarioMetodoPagos)
+                .HasForeignKey(d => d.MetodoPagoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UsuarioMetodoPago_MetodoPago");
         });
 
         modelBuilder.Entity<VerificacionIdentidad>(entity =>

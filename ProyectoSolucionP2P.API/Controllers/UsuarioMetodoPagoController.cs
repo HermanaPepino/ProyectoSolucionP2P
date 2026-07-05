@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
@@ -9,11 +9,11 @@ namespace ProyectoSolucionP2P.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class OfertaController : ControllerBase
+    public class UsuarioMetodoPagoController : ControllerBase
     {
-        private readonly IOfertaService _service;
+        private readonly IUsuarioMetodoPagoService _service;
 
-        public OfertaController(IOfertaService service)
+        public UsuarioMetodoPagoController(IUsuarioMetodoPagoService service)
         {
             _service = service;
         }
@@ -21,9 +21,23 @@ namespace ProyectoSolucionP2P.API.Controllers
         private int UsuarioActualId =>
             int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-            => Ok(await _service.GetAllAsync());
+        private bool EsAdmin =>
+            User.IsInRole("Administrador");
+
+        [HttpGet("mis-metodos")]
+        public async Task<IActionResult> MisMetodos()
+        {
+            return Ok(await _service.GetByUsuarioIdAsync(UsuarioActualId));
+        }
+
+        [HttpGet("usuario/{usuarioId}")]
+        public async Task<IActionResult> GetByUsuario(int usuarioId)
+        {
+            if (!EsAdmin && usuarioId != UsuarioActualId)
+                return Forbid();
+
+            return Ok(await _service.GetByUsuarioIdAsync(usuarioId));
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -33,7 +47,7 @@ namespace ProyectoSolucionP2P.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(OfertaDto dto)
+        public async Task<IActionResult> Create(UsuarioMetodoPagoCreateDto dto)
         {
             try
             {
@@ -41,21 +55,6 @@ namespace ProyectoSolucionP2P.API.Controllers
 
                 var creado = await _service.CreateAsync(dto);
                 return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, OfertaDto dto)
-        {
-            try
-            {
-                return await _service.UpdateAsync(id, dto)
-                    ? NoContent()
-                    : NotFound();
             }
             catch (InvalidOperationException ex)
             {
