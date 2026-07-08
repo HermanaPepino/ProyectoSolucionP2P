@@ -7,11 +7,16 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
     public class UsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepository _repo;
+        private readonly IReputacionRepository _reputacionRepo;
         private readonly IJwtService _jwt;
 
-        public UsuarioService(IUsuarioRepository repo, IJwtService jwt)
+        public UsuarioService(
+            IUsuarioRepository repo,
+            IReputacionRepository reputacionRepo,
+            IJwtService jwt)
         {
             _repo = repo;
+            _reputacionRepo = reputacionRepo;
             _jwt = jwt;
         }
 
@@ -82,6 +87,10 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             if (u == null) return false;
             await _repo.DeleteAsync(id);
             return true;
+        }
+        public async Task<UsuarioReputacionDto> GetReputacionAsync(int usuarioId)
+        {
+            return await _reputacionRepo.ObtenerReputacionAsync(usuarioId);
         }
 
         // Mapea Entidad -> DTO (sin exponer el Password)

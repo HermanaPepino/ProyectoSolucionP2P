@@ -10,5 +10,6 @@ namespace ProyectoSolucionP2P.CORE.Core.Interfaces
         Task<AuthResponseDto?> LoginAsync(LoginDto dto);            // HU-002
         Task<bool> UpdateAsync(int id, UsuarioRegistroDto dto);
         Task<bool> DeleteAsync(int id);
+        Task<UsuarioReputacionDto> GetReputacionAsync(int usuarioId);
     }
 }

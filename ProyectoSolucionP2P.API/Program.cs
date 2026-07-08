@@ -41,6 +41,7 @@ builder.Services.AddCors(o => o.AddPolicy("dev",
 
 // --- Repositories ---
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IReputacionRepository, ReputacionRepository>();
 builder.Services.AddScoped<IMonedaRepository, MonedaRepository>();
 builder.Services.AddScoped<IMetodoPagoRepository, MetodoPagoRepository>();
 builder.Services.AddScoped<IUsuarioMetodoPagoRepository, UsuarioMetodoPagoRepository>();

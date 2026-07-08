@@ -27,6 +27,17 @@ namespace ProyectoSolucionP2P.API.Controllers
             return u == null ? NotFound() : Ok(u);
         }
 
+        [HttpGet("{id}/reputacion")]
+        public async Task<IActionResult> GetReputacion(int id)
+        {
+            var reputacion = await _service.GetReputacionAsync(id);
+
+            if (reputacion == null)
+                return NotFound();
+
+            return Ok(reputacion);
+        }
+
         // HU-001
         [HttpPost("registrar")]
         [AllowAnonymous]
