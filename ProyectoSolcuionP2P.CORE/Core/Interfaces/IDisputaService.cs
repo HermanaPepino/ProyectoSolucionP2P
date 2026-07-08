@@ -10,7 +10,10 @@ namespace ProyectoSolucionP2P.CORE.Core.Interfaces
         Task<bool> UpdateAsync(int id, DisputaDto dto);
         Task<bool> DeleteAsync(int id);
 
-        // HU-014: abre la disputa, congela la operación y notifica
+        // Abre la disputa, valida permisos, evita duplicados y respeta el plazo de 30 días.
         Task<(DisputaDto? disputa, string? error)> AbrirAsync(int operacionId, string motivo, int usuarioId);
+
+        Task<IEnumerable<DisputaHistorialDto>> GetMisDisputasAsync(int usuarioId);
+        Task<DisputaHistorialDto?> GetByOperacionForUserAsync(int operacionId, int usuarioId);
     }
 }
