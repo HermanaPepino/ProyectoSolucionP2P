@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
@@ -11,12 +12,24 @@ namespace ProyectoSolucionP2P.API.Controllers
     public class CalificacionController : ControllerBase
     {
         private readonly ICalificacionService _service;
-        public CalificacionController(ICalificacionService service) { _service = service; }
+
+        public CalificacionController(ICalificacionService service)
+        {
+            _service = service;
+        }
+
+        private int UsuarioActualId =>
+            int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         [HttpGet]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
-        [HttpGet("{id}")]
+        [HttpGet("mis-calificaciones")]
+        public async Task<IActionResult> GetMisCalificaciones([FromQuery] int dias = 30)
+            => Ok(await _service.GetMisCalificacionesAsync(UsuarioActualId, dias));
+
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
             var dto = await _service.GetByIdAsync(id);
@@ -26,15 +39,33 @@ namespace ProyectoSolucionP2P.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CalificacionDto dto)
         {
-            var creado = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
+            try
+            {
+                var creado = await _service.CreateAsync(dto, UsuarioActualId);
+                return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Update(int id, CalificacionDto dto)
-            => await _service.UpdateAsync(id, dto) ? NoContent() : NotFound();
+        {
+            try
+            {
+                return await _service.UpdateAsync(id, dto) ? NoContent() : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(int id)
             => await _service.DeleteAsync(id) ? NoContent() : NotFound();
     }

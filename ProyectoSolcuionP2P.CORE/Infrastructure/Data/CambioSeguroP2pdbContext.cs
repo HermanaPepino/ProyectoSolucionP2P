@@ -101,10 +101,10 @@ public partial class CambioSeguroP2pdbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.Motivo)
-                .HasMaxLength(300)
+                .HasMaxLength(2000)
                 .IsUnicode(false);
             entity.Property(e => e.Resolucion)
-                .HasMaxLength(300)
+                .HasMaxLength(1000)
                 .IsUnicode(false);
 
             entity.HasOne(d => d.Operacion).WithMany(p => p.Disputa)

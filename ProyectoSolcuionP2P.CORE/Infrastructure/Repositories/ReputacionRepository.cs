@@ -17,48 +17,69 @@ namespace ProyectoSolucionP2P.CORE.Infrastructure.Repositories
         public async Task<UsuarioReputacionDto> ObtenerReputacionAsync(int usuarioId)
         {
             var usuario = await _db.Usuarios
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == usuarioId);
 
             if (usuario == null)
                 return null!;
 
             var calificaciones = await _db.Calificacions
+                .AsNoTracking()
                 .Where(c => c.UsuarioCalificadoId == usuarioId)
                 .ToListAsync();
 
             var promedio = calificaciones.Any()
-                ? Math.Round(calificaciones.Average(c => c.Puntaje), 2)
+                ? Math.Round((decimal)calificaciones.Average(c => c.Puntaje), 2)
                 : 0;
-            // Todas las operaciones donde participó el usuario
+
             var operaciones = await _db.Operacions
+                .AsNoTracking()
                 .Where(o => o.VendedorId == usuarioId || o.CompradorId == usuarioId)
                 .ToListAsync();
 
-            // Solo las operaciones completadas
-            var operacionesCompletadas = operaciones.Count(o => o.Estado == "Completada");
+            var operacionesCompletadas = operaciones
+                .Count(o => o.Estado == "Completada");
 
-            // Tasa de éxito
-            decimal tasaExito = operaciones.Count == 0
+            // Solo contamos estados finales. Si una operación sigue en proceso, pago enviado
+            // o disputa abierta, todavía no debería perjudicar la tasa de éxito del usuario.
+            var estadosFinales = new[] { "Completada", "Cancelada", "Expirada" };
+
+            var operacionesFinalizadas = operaciones
+                .Count(o => estadosFinales.Contains(o.Estado));
+
+            var tasaExito = operacionesFinalizadas == 0
                 ? 0
-                : Math.Round((decimal)operacionesCompletadas * 100 / operaciones.Count, 2);
+                : Math.Round((decimal)operacionesCompletadas * 100 / operacionesFinalizadas, 2);
+
+            var operacionesConTiempo = operaciones
+                .Where(o =>
+                    o.Estado == "Completada" &&
+                    o.FechaInicio.HasValue &&
+                    o.FechaFin.HasValue &&
+                    o.FechaFin.Value >= o.FechaInicio.Value)
+                .ToList();
+
+            var tiempoPromedioOperacionMinutos = operacionesConTiempo.Any()
+                ? Math.Round((decimal)operacionesConTiempo
+                    .Average(o => (o.FechaFin!.Value - o.FechaInicio!.Value).TotalMinutes), 2)
+                : 0;
 
             return new UsuarioReputacionDto
             {
                 UsuarioId = usuario.Id,
                 Nombre = usuario.NombreCompleto,
-
-                CalificacionPromedio = (decimal)promedio,
-
+                CalificacionPromedio = promedio,
                 CantidadCalificaciones = calificaciones.Count,
-
                 OperacionesCompletadas = operacionesCompletadas,
-
+                OperacionesFinalizadas = operacionesFinalizadas,
                 TasaExito = tasaExito,
-
+                TiempoPromedioOperacionMinutos = tiempoPromedioOperacionMinutos,
                 Comentarios = calificaciones
                     .OrderByDescending(c => c.FechaRegistro)
+                    .Select(c => c.Comentario?.Trim())
+                    .Where(c => !string.IsNullOrWhiteSpace(c))
                     .Take(5)
-                    .Select(c => c.Comentario ?? "")
+                    .Select(c => c!)
                     .ToList()
             };
         }
