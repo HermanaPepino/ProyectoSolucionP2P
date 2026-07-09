@@ -46,6 +46,9 @@ namespace ProyectoSolucionP2P.API.Controllers
         [HttpPost("iniciar-trato")]
         public async Task<IActionResult> IniciarTrato(IniciarTratoDto dto)
         {
+            if (User.IsInRole("Administrador"))
+                return BadRequest(new { mensaje = "El administrador no puede iniciar operaciones como comprador." });
+
             var (operacion, error) = await _service.IniciarTratoAsync(dto, UsuarioActualId);
             if (error != null) return BadRequest(new { mensaje = error });
             return CreatedAtAction(nameof(GetById), new { id = operacion!.Id }, operacion);
@@ -55,6 +58,9 @@ namespace ProyectoSolucionP2P.API.Controllers
         [HttpPut("{id}/cancelar")]
         public async Task<IActionResult> Cancelar(int id)
         {
+            if (User.IsInRole("Administrador"))
+                return BadRequest(new { mensaje = "El administrador no cancela operaciones desde el flujo de usuario." });
+
             var (ok, error) = await _service.CancelarAsync(id, UsuarioActualId);
             if (!ok) return BadRequest(new { mensaje = error });
             return NoContent();
@@ -64,6 +70,9 @@ namespace ProyectoSolucionP2P.API.Controllers
         [HttpPut("{id}/confirmar-recepcion")]
         public async Task<IActionResult> ConfirmarRecepcion(int id)
         {
+            if (User.IsInRole("Administrador"))
+                return BadRequest(new { mensaje = "El administrador no confirma pagos como vendedor. Debe gestionar casos desde el dashboard." });
+
             var (ok, error) = await _service.ConfirmarRecepcionPagoAsync(id, UsuarioActualId);
             if (!ok) return BadRequest(new { mensaje = error });
             return NoContent();

@@ -35,6 +35,9 @@ namespace ProyectoSolucionP2P.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(OfertaDto dto)
         {
+            if (User.IsInRole("Administrador"))
+                return BadRequest(new { mensaje = "El administrador gestiona la plataforma, pero no puede publicar ofertas como vendedor." });
+
             try
             {
                 dto.UsuarioId = UsuarioActualId;
