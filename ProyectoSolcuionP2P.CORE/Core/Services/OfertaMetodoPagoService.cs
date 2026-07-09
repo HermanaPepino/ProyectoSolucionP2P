@@ -38,14 +38,16 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
         {
             var e = await _repo.GetByIdAsync(id);
             if (e == null) return false;
+
             e.OfertaId = dto.OfertaId;
             e.MetodoPagoId = dto.MetodoPagoId;
-            await _repo.UpdateAsync(e);
-            return true;
             e.Alias = dto.Alias;
             e.DatosRecepcion = dto.DatosRecepcion;
             e.Instrucciones = dto.Instrucciones;
             e.ResumenPublico = dto.ResumenPublico;
+
+            await _repo.UpdateAsync(e);
+            return true;
         }
 
         public async Task<bool> DeleteAsync(int id)

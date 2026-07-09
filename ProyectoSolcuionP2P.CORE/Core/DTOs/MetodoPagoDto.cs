@@ -21,6 +21,10 @@ namespace ProyectoSolucionP2P.CORE.Core.DTOs
 
         public string Alias { get; set; } = string.Empty;
 
+        // Datos completos del método guardado del propio usuario.
+        // Se usan al publicar ofertas para copiar los datos de recepción del vendedor.
+        public Dictionary<string, string> DatosPago { get; set; } = new();
+
         public string ResumenPublico { get; set; } = string.Empty;
 
         public bool Activo { get; set; }

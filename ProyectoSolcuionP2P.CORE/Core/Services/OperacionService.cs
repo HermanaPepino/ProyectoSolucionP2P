@@ -1,4 +1,3 @@
-using System.Text.Json;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
 using ProyectoSolucionP2P.CORE.Core.Entities;
 using ProyectoSolucionP2P.CORE.Core.Interfaces;
@@ -12,7 +11,6 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
         private readonly IOperacionRepository _repo;
         private readonly IOfertaRepository _ofertaRepo;
         private readonly IUsuarioRepository _usuarioRepo;
-        private readonly IUsuarioMetodoPagoRepository _usuarioMetodoPagoRepo;
         private readonly ITemporizadorOperacionRepository _temporizadorRepo;
         private readonly INotificacionService _notificaciones;
 
@@ -20,14 +18,12 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             IOperacionRepository repo,
             IOfertaRepository ofertaRepo,
             IUsuarioRepository usuarioRepo,
-            IUsuarioMetodoPagoRepository usuarioMetodoPagoRepo,
             ITemporizadorOperacionRepository temporizadorRepo,
             INotificacionService notificaciones)
         {
             _repo = repo;
             _ofertaRepo = ofertaRepo;
             _usuarioRepo = usuarioRepo;
-            _usuarioMetodoPagoRepo = usuarioMetodoPagoRepo;
             _temporizadorRepo = temporizadorRepo;
             _notificaciones = notificaciones;
         }
@@ -135,54 +131,9 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
                 return (null, "El método de pago seleccionado no pertenece a esta oferta.");
 
             var metodoPagoId = ofertaMetodoPago.MetodoPagoId;
-            var metodoPagoNombre = ofertaMetodoPago.MetodoPago?.Nombre ?? "Método de pago";
 
-            int? usuarioMetodoPagoId = null;
-            string? datosPagoComprador = null;
-            string? resumenPagoComprador = null;
-
-            if (dto.UsuarioMetodoPagoId.HasValue)
-            {
-                var metodoGuardado = await _usuarioMetodoPagoRepo.GetByIdAsync(dto.UsuarioMetodoPagoId.Value);
-
-                if (metodoGuardado == null || !metodoGuardado.Activo)
-                    return (null, "El método guardado no existe o está inactivo.");
-
-                if (metodoGuardado.UsuarioId != compradorId)
-                    return (null, "No puedes usar un método guardado de otro usuario.");
-
-                if (metodoGuardado.MetodoPagoId != metodoPagoId)
-                    return (null, "El método guardado no coincide con el método elegido.");
-
-                usuarioMetodoPagoId = metodoGuardado.Id;
-                datosPagoComprador = metodoGuardado.DatosPago;
-                resumenPagoComprador = metodoGuardado.ResumenPublico;
-            }
-            else
-            {
-                if (dto.DatosPagoComprador == null || dto.DatosPagoComprador.Count == 0)
-                    return (null, "Ingresa tus datos de pago para esta operación.");
-
-                datosPagoComprador = JsonSerializer.Serialize(dto.DatosPagoComprador);
-                resumenPagoComprador = CrearResumenPagoComprador(metodoPagoNombre, dto.DatosPagoComprador);
-
-                if (dto.GuardarMetodoComprador)
-                {
-                    var metodoGuardado = new UsuarioMetodoPago
-                    {
-                        UsuarioId = compradorId,
-                        MetodoPagoId = metodoPagoId,
-                        Alias = metodoPagoNombre,
-                        DatosPago = datosPagoComprador,
-                        ResumenPublico = resumenPagoComprador,
-                        Activo = true,
-                        FechaCreacion = DateTime.Now
-                    };
-
-                    var creado = await _usuarioMetodoPagoRepo.CreateAsync(metodoGuardado);
-                    usuarioMetodoPagoId = creado.Id;
-                }
-            }
+            if (string.IsNullOrWhiteSpace(ofertaMetodoPago.DatosRecepcion))
+                return (null, "El vendedor no completó los datos de recepción para este método.");
 
             var vendedorId = oferta.UsuarioId;
             var ahora = DateTime.Now;
@@ -197,9 +148,9 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
                 CodigoOperacion = GenerarCodigoOperacion(),
                 OfertaMetodoPagoId = ofertaMetodoPago.Id,
                 MetodoPagoId = metodoPagoId,
-                UsuarioMetodoPagoId = usuarioMetodoPagoId,
-                DatosPagoComprador = datosPagoComprador,
-                ResumenPagoComprador = resumenPagoComprador,
+                UsuarioMetodoPagoId = null,
+                DatosPagoComprador = null,
+                ResumenPagoComprador = null,
                 FechaInicio = ahora
             };
 
@@ -342,27 +293,6 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             return null;
         }
 
-        private static string CrearResumenPagoComprador(string metodoPagoNombre, Dictionary<string, string> datos)
-        {
-            string? referencia = null;
-
-            foreach (var key in new[] { "telefono", "cuenta", "correo", "ultimos4", "referencia" })
-            {
-                if (datos.TryGetValue(key, out var valor) && !string.IsNullOrWhiteSpace(valor))
-                {
-                    referencia = valor.Trim();
-                    break;
-                }
-            }
-
-            referencia ??= datos.Values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? "registrado";
-
-            if (referencia.Length <= 4)
-                return $"{metodoPagoNombre}: {referencia}";
-
-            return $"{metodoPagoNombre}: ****{referencia[^4..]}";
-        }
-
         private async Task<OperacionDto> EnriquecerYExpirarAsync(Operacion e)
         {
             var dto = MapToDto(e);
@@ -463,6 +393,10 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
                 MetodoPagoNombre = e.MetodoPago?.Nombre
                     ?? e.OfertaMetodoPago?.MetodoPago?.Nombre
                     ?? string.Empty,
+                AliasPagoVendedor = e.OfertaMetodoPago?.Alias,
+                DatosRecepcionVendedor = e.OfertaMetodoPago?.DatosRecepcion,
+                InstruccionesPagoVendedor = e.OfertaMetodoPago?.Instrucciones,
+                ResumenPagoVendedor = e.OfertaMetodoPago?.ResumenPublico,
                 UsuarioMetodoPagoId = e.UsuarioMetodoPagoId,
                 DatosPagoComprador = e.DatosPagoComprador,
                 ResumenPagoComprador = e.ResumenPagoComprador,

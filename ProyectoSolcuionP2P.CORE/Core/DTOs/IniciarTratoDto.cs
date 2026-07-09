@@ -6,14 +6,10 @@
 
         public decimal Monto { get; set; }
 
+        // Método concreto publicado por el vendedor dentro de la oferta.
         public int? OfertaMetodoPagoId { get; set; }
 
+        // Respaldo para ofertas antiguas: permite buscar por tipo de método.
         public int? MetodoPagoId { get; set; }
-
-        public int? UsuarioMetodoPagoId { get; set; }
-
-        public bool GuardarMetodoComprador { get; set; }
-
-        public Dictionary<string, string>? DatosPagoComprador { get; set; }
     }
 }
