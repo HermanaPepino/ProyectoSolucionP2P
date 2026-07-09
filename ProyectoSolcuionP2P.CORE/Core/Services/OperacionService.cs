@@ -192,7 +192,12 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             if (operacion.Estado != "En proceso")
                 return (false, "Solo se pueden cancelar operaciones en proceso.");
 
+            var ahora = DateTime.Now;
+
             operacion.Estado = "Cancelada";
+            operacion.FechaFin ??= ahora;
+            operacion.FechaLiberacion ??= ahora;
+
             await _repo.UpdateAsync(operacion);
 
             await ExpirarTemporizadorAsync(operacionId, "Cancelado");
@@ -302,6 +307,9 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
                 if (e.Estado == "En proceso")
                 {
                     e.Estado = "Expirada";
+                    e.FechaFin ??= ahora;
+                    e.FechaLiberacion ??= ahora;
+
                     await _repo.UpdateAsync(e);
                     await LiberarOfertaAsync(e.OfertaId);
 

@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
@@ -17,9 +16,6 @@ namespace ProyectoSolucionP2P.API.Controllers
         {
             _service = service;
         }
-        h
-        private int UsuarioActualId =>
-            int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         [HttpGet]
         [Authorize(Roles = "Administrador")]
@@ -37,19 +33,41 @@ namespace ProyectoSolucionP2P.API.Controllers
         public async Task<IActionResult> Create(CalificacionDto dto)
         {
             if (User.IsInRole("Administrador"))
-                return BadRequest(new { mensaje = "El administrador no puede registrar calificaciones." });
+                return BadRequest(new
+                {
+                    mensaje = "El administrador no puede registrar calificaciones."
+                });
 
-            var creado = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
+            try
+            {
+                var creado = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, CalificacionDto dto)
         {
             if (User.IsInRole("Administrador"))
-                return BadRequest(new { mensaje = "El administrador no puede modificar calificaciones como usuario." });
+                return BadRequest(new
+                {
+                    mensaje = "El administrador no puede modificar calificaciones como usuario."
+                });
 
-            return await _service.UpdateAsync(id, dto) ? NoContent() : NotFound();
+            try
+            {
+                return await _service.UpdateAsync(id, dto)
+                    ? NoContent()
+                    : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
 
         [HttpDelete("{id:int}")]
