@@ -26,6 +26,17 @@ namespace ProyectoSolucionP2P.CORE.Core.DTOs
 
         public string? MetodoPagoNombre { get; set; }
 
+        // Datos publicados por el vendedor para recibir el pago manual.
+        public string? AliasPagoVendedor { get; set; }
+
+        public string? DatosRecepcionVendedor { get; set; }
+
+        public string? InstruccionesPagoVendedor { get; set; }
+
+        public string? ResumenPagoVendedor { get; set; }
+
+        // Se conservan por compatibilidad con la BD/parches anteriores, pero el flujo P2P manual
+        // ya no obliga al comprador a registrar un método propio para iniciar operación.
         public int? UsuarioMetodoPagoId { get; set; }
 
         public string? DatosPagoComprador { get; set; }

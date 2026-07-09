@@ -43,7 +43,12 @@ namespace ProyectoSolucionP2P.API.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var dto = await _service.GetByIdAsync(id);
-            return dto == null ? NotFound() : Ok(dto);
+            if (dto == null) return NotFound();
+
+            if (!EsAdmin && dto.UsuarioId != UsuarioActualId)
+                return Forbid();
+
+            return Ok(dto);
         }
 
         [HttpPost]
@@ -64,6 +69,14 @@ namespace ProyectoSolucionP2P.API.Controllers
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
-            => await _service.DeleteAsync(id) ? NoContent() : NotFound();
+        {
+            var dto = await _service.GetByIdAsync(id);
+            if (dto == null) return NotFound();
+
+            if (!EsAdmin && dto.UsuarioId != UsuarioActualId)
+                return Forbid();
+
+            return await _service.DeleteAsync(id) ? NoContent() : NotFound();
+        }
     }
 }

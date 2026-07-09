@@ -38,16 +38,23 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
                 throw new InvalidOperationException("El alias es obligatorio.");
 
             if (dto.DatosPago == null || dto.DatosPago.Count == 0)
-                throw new InvalidOperationException("Los datos del método de pago son obligatorios.");
+                throw new InvalidOperationException("Los datos del método de recepción son obligatorios.");
+
+            var datosLimpios = dto.DatosPago
+                .Where(kv => !string.IsNullOrWhiteSpace(kv.Key) && !string.IsNullOrWhiteSpace(kv.Value))
+                .ToDictionary(kv => kv.Key.Trim(), kv => kv.Value.Trim());
+
+            if (datosLimpios.Count == 0)
+                throw new InvalidOperationException("Completa los datos del método de recepción.");
 
             var entity = new UsuarioMetodoPago
             {
                 UsuarioId = dto.UsuarioId,
                 MetodoPagoId = dto.MetodoPagoId,
                 Alias = dto.Alias.Trim(),
-                DatosPago = JsonSerializer.Serialize(dto.DatosPago),
+                DatosPago = JsonSerializer.Serialize(datosLimpios),
                 ResumenPublico = string.IsNullOrWhiteSpace(dto.ResumenPublico)
-                    ? CrearResumen(dto.Alias, dto.DatosPago)
+                    ? CrearResumen(dto.Alias, datosLimpios)
                     : dto.ResumenPublico.Trim(),
                 Activo = true,
                 FechaCreacion = DateTime.Now
@@ -78,6 +85,21 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             return $"{alias} • ****{valor[^4..]}";
         }
 
+        private static Dictionary<string, string> LeerDatosPago(string? json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return new Dictionary<string, string>();
+
+            try
+            {
+                return JsonSerializer.Deserialize<Dictionary<string, string>>(json)
+                    ?? new Dictionary<string, string>();
+            }
+            catch
+            {
+                return new Dictionary<string, string>();
+            }
+        }
+
         private static UsuarioMetodoPagoDto MapToDto(UsuarioMetodoPago e)
         {
             return new UsuarioMetodoPagoDto
@@ -87,6 +109,7 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
                 MetodoPagoId = e.MetodoPagoId,
                 MetodoPagoNombre = e.MetodoPago?.Nombre ?? string.Empty,
                 Alias = e.Alias,
+                DatosPago = LeerDatosPago(e.DatosPago),
                 ResumenPublico = e.ResumenPublico,
                 Activo = e.Activo,
                 FechaCreacion = e.FechaCreacion
