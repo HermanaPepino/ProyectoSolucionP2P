@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
@@ -18,16 +17,10 @@ namespace ProyectoSolucionP2P.API.Controllers
             _service = service;
         }
 
-        private int UsuarioActualId =>
-            int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
         [HttpGet]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
-
-        [HttpGet("mis-calificaciones")]
-        public async Task<IActionResult> GetMisCalificaciones([FromQuery] int dias = 30)
-            => Ok(await _service.GetMisCalificacionesAsync(UsuarioActualId, dias));
+        public async Task<IActionResult> GetAll()
+            => Ok(await _service.GetAllAsync());
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
@@ -39,9 +32,15 @@ namespace ProyectoSolucionP2P.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CalificacionDto dto)
         {
+            if (User.IsInRole("Administrador"))
+                return BadRequest(new
+                {
+                    mensaje = "El administrador no puede registrar calificaciones."
+                });
+
             try
             {
-                var creado = await _service.CreateAsync(dto, UsuarioActualId);
+                var creado = await _service.CreateAsync(dto);
                 return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
             }
             catch (InvalidOperationException ex)
@@ -51,12 +50,19 @@ namespace ProyectoSolucionP2P.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Update(int id, CalificacionDto dto)
         {
+            if (User.IsInRole("Administrador"))
+                return BadRequest(new
+                {
+                    mensaje = "El administrador no puede modificar calificaciones como usuario."
+                });
+
             try
             {
-                return await _service.UpdateAsync(id, dto) ? NoContent() : NotFound();
+                return await _service.UpdateAsync(id, dto)
+                    ? NoContent()
+                    : NotFound();
             }
             catch (InvalidOperationException ex)
             {

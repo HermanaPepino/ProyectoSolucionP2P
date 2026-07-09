@@ -38,6 +38,9 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
         public async Task<IEnumerable<DisputaDto>> GetAllAsync()
             => (await _repo.GetAllAsync()).Select(MapToDto);
 
+        public async Task<IEnumerable<DisputaHistorialDto>> GetAllHistorialAsync()
+            => (await _repo.GetAllAsync()).Select(MapToHistorialDto);
+
         public async Task<DisputaDto?> GetByIdAsync(int id)
         {
             var e = await _repo.GetByIdAsync(id);
@@ -170,6 +173,65 @@ namespace ProyectoSolucionP2P.CORE.Core.Services
             });
 
             return (MapToDto(creada), null);
+        }
+
+
+        // HU-015: administración resuelve la disputa y deja trazabilidad de la decisión.
+        // Regla usada para el proyecto:
+        // - A favor del vendedor: la operación queda Completada.
+        // - A favor del comprador: la operación queda Cancelada.
+        public async Task<(bool ok, string? error)> ResolverAsync(int id, string estadoResolucion, string resolucion)
+        {
+            var disputa = await _repo.GetByIdAsync(id);
+            if (disputa == null)
+                return (false, "La disputa no existe.");
+
+            var estadoLimpio = (estadoResolucion ?? string.Empty).Trim();
+            if (estadoLimpio != "Resuelta a favor comprador" && estadoLimpio != "Resuelta a favor vendedor")
+                return (false, "Selecciona una resolución válida.");
+
+            var resolucionLimpia = (resolucion ?? string.Empty).Trim();
+            if (resolucionLimpia.Length < 10)
+                return (false, "La resolución debe tener al menos 10 caracteres.");
+
+            if (resolucionLimpia.Length > 1000)
+                resolucionLimpia = resolucionLimpia[..1000];
+
+            disputa.Estado = estadoLimpio;
+            disputa.Resolucion = resolucionLimpia;
+
+            await _repo.UpdateAsync(disputa);
+
+            var operacion = await _operacionRepo.GetByIdAsync(disputa.OperacionId);
+            if (operacion != null)
+            {
+                operacion.Estado = estadoLimpio == "Resuelta a favor vendedor" ? "Completada" : "Cancelada";
+                operacion.FechaFin ??= DateTime.Now;
+                operacion.FechaLiberacion ??= DateTime.Now;
+                await _operacionRepo.UpdateAsync(operacion);
+
+                await _notificaciones.CreateAsync(new NotificacionDto
+                {
+                    UsuarioId = operacion.CompradorId,
+                    Titulo = "Disputa resuelta",
+                    Mensaje = $"La disputa de la operación {operacion.CodigoOperacion} fue resuelta: {estadoLimpio}.",
+                    Leida = false,
+                    OperacionId = operacion.Id,
+                    FechaCreacion = DateTime.Now
+                });
+
+                await _notificaciones.CreateAsync(new NotificacionDto
+                {
+                    UsuarioId = operacion.VendedorId,
+                    Titulo = "Disputa resuelta",
+                    Mensaje = $"La disputa de la operación {operacion.CodigoOperacion} fue resuelta: {estadoLimpio}.",
+                    Leida = false,
+                    OperacionId = operacion.Id,
+                    FechaCreacion = DateTime.Now
+                });
+            }
+
+            return (true, null);
         }
 
         public async Task<IEnumerable<DisputaHistorialDto>> GetMisDisputasAsync(int usuarioId)

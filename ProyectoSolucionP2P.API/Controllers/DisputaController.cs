@@ -41,7 +41,13 @@ namespace ProyectoSolucionP2P.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
+        public async Task<IActionResult> GetAll()
+            => Ok(await _service.GetAllAsync());
+
+        [HttpGet("admin/historial")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> GetAllHistorial()
+            => Ok(await _service.GetAllHistorialAsync());
 
         [HttpGet("mis-disputas")]
         public async Task<IActionResult> GetMisDisputas()
@@ -51,7 +57,10 @@ namespace ProyectoSolucionP2P.API.Controllers
         public async Task<IActionResult> GetByOperacion(int operacionId)
         {
             var dto = await _service.GetByOperacionForUserAsync(operacionId, UsuarioActualId);
-            return dto == null ? NotFound(new { mensaje = "Esta operación no tiene disputa registrada." }) : Ok(dto);
+
+            return dto == null
+                ? NotFound(new { mensaje = "Esta operación no tiene disputa registrada." })
+                : Ok(dto);
         }
 
         [HttpGet("{id:int}")]
@@ -76,7 +85,6 @@ namespace ProyectoSolucionP2P.API.Controllers
             public IFormFile? Archivo { get; set; }
         }
 
-        // HU-014: abre disputa con evidencia obligatoria.
         [HttpPost("abrir")]
         [RequestSizeLimit(MaxArchivoBytes + 1024 * 1024)]
         public async Task<IActionResult> Abrir([FromForm] AbrirDisputaRequest req)
@@ -85,8 +93,14 @@ namespace ProyectoSolucionP2P.API.Controllers
             if (errorArchivo != null)
                 return BadRequest(new { mensaje = errorArchivo });
 
-            var (disputa, error) = await _service.AbrirAsync(req.OperacionId, req.Motivo, UsuarioActualId);
-            if (error != null) return BadRequest(new { mensaje = error });
+            var (disputa, error) = await _service.AbrirAsync(
+                req.OperacionId,
+                req.Motivo,
+                UsuarioActualId
+            );
+
+            if (error != null)
+                return BadRequest(new { mensaje = error });
 
             var rutaPublica = await GuardarArchivoAsync(disputa!.Id, req.Archivo!);
 
@@ -103,6 +117,28 @@ namespace ProyectoSolucionP2P.API.Controllers
                 evidencia,
                 mensaje = "Disputa registrada con evidencia. Administración revisará el caso."
             });
+        }
+
+        public class ResolverDisputaRequest
+        {
+            public string Estado { get; set; } = string.Empty;
+            public string Resolucion { get; set; } = string.Empty;
+        }
+
+        [HttpPut("{id:int}/resolver")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> Resolver(int id, ResolverDisputaRequest req)
+        {
+            var (ok, error) = await _service.ResolverAsync(
+                id,
+                req.Estado,
+                req.Resolucion
+            );
+
+            if (!ok)
+                return BadRequest(new { mensaje = error });
+
+            return NoContent();
         }
 
         [HttpPut("{id:int}")]
@@ -124,6 +160,7 @@ namespace ProyectoSolucionP2P.API.Controllers
                 return "La evidencia no puede pesar más de 5 MB.";
 
             var extension = Path.GetExtension(archivo.FileName).ToLowerInvariant();
+
             if (!ExtensionesPermitidas.Contains(extension))
                 return "Formato inválido. Adjunta JPG, PNG o PDF.";
 
@@ -132,7 +169,9 @@ namespace ProyectoSolucionP2P.API.Controllers
 
         private async Task<string> GuardarArchivoAsync(int disputaId, IFormFile archivo)
         {
-            var root = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var root = _env.WebRootPath ??
+                       Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
             var carpeta = Path.Combine(root, "uploads", "disputas");
             Directory.CreateDirectory(carpeta);
 

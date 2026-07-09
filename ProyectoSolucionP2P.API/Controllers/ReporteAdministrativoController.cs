@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProyectoSolucionP2P.CORE.Core.DTOs;
@@ -26,6 +27,9 @@ namespace ProyectoSolucionP2P.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ReporteAdministrativoDto dto)
         {
+            dto.GeneradoPorUsuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            dto.FechaGeneracion ??= DateTime.Now;
+
             var creado = await _service.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
         }
